@@ -133,11 +133,11 @@ sf::Color GraphicDisplay::get_color(double value) {
     value = pow(value, 2.0);
     if (value < 0.2) {
         return sf::Color((0.1) * 255.0, (0.2) * 255.0, (0.3) * 255.0);
-    } else if (value >= 0.2 && value < 0.7) {
+    } else if (value >= 0.2 and value < 0.7) {
         return sf::Color((0.1 + ((value - 0.2) / 0.5) * 0.9) * 255.0, (0.2 -
                                                                        ((value - 0.2) / 0.5) * 0.2) * 255.0,
                          (0.3 + ((value - 0.2) / 0.5) * 0.7) * 255.0);
-    } else if (value >= 0.7 && value < 0.9) {
+    } else if (value >= 0.7 and value < 0.9) {
         return sf::Color((1.0) * 255.0, ((value - 0.7) / 0.2) * 255.0, (1.0 -
                                                                         (value - 0.7) / 0.2) * 255.0);
     } else if (value >= 0.9) {

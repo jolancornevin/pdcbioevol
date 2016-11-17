@@ -18,9 +18,10 @@ public:
         retry_ = move->retry_;
     }
 
+    //la distance maximale, i.e. le nombre de cases dans la grille, à laquelle la pseudo-flagelle permet d’accéder
     int distance_ = -1;
+    //le nombre maximum de tentative de d´eplacement la flagelle permet de faire à chaque pas de temps
     int retry_ = -1;
-
 };
 
 

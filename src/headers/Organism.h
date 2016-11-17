@@ -39,7 +39,9 @@ public:
 
     std::unordered_map<float, Protein *> protein_list_map_;
 
+    //Une liste de pompe
     std::vector<Pump *> pump_list_;
+    //Une liste de déplacement
     std::vector<Move *> move_list_;
 
     float metabolic_error[Common::Metabolic_Error_Precision];

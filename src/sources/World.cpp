@@ -28,6 +28,7 @@ World::World(int width, int height, uint32_t seed) {
     statfile_mean_.open("stats_mean.txt");
 }
 
+//Remplis le monde de manière aléatoire
 void World::random_population() {
     float fitness = 0.0;
     Organism *org = nullptr;
@@ -35,6 +36,7 @@ void World::random_population() {
     printf("Searching for a viable organism ");
 
     long i = 0;
+    //On cherche la première cellule viable
     while (fitness <= 0.0) {
         delete org;
         dna = new DNA(grid_cell_[0]);
@@ -42,16 +44,20 @@ void World::random_population() {
         org->gridcell_ = grid_cell_[0];
         org->init_organism();
         org->build_regulation_network();
+
         for (int t = 0; t < Common::Number_Degradation_Step; t++)
             org->compute_protein_concentration();
+
         org->compute_fitness();
         fitness = org->fitness_;
+
         if (org->dying_or_not()) {
             fitness = 0;
         }
+
         printf(".");
+
         delete dna;
-        //if (i%100==0) printf(".");
         i++;
     }
 
@@ -59,7 +65,8 @@ void World::random_population() {
     max_fitness_ = org->fitness_;
 
     printf("Found !\nFilling the grid\n");
-    for (int i = 0; i < width_; i++) {
+    //TODO à optimiser
+    for (i = 0; i < width_; i++) {
         for (int j = 0; j < height_; j++) {
             grid_cell_[i * width_ + j]->organism_ = new Organism(new DNA(org->dna_));
             grid_cell_[i * width_ + j]->organism_->init_organism();
@@ -87,12 +94,16 @@ void World::init_environment() {
 }
 
 void World::run_evolution() {
+    //Tans que le temps n'a pas dépacer le nombre de mutation max
     while (time_ < Common::Number_Evolution_Step) {
         evolution_step();
+
         int living_one = 0;
-        for (int i = 0; i < width_; i++) {
-            for (int j = 0; j < height_; j++) {
-                if (grid_cell_[i * width_ + j]->organism_ != nullptr) {
+        //Compte le nombre de cellules vivantes
+        //TODO à optimiser
+        for (int line = 0; line < width_; line++) {
+            for (int column = 0; column < height_; column++) {
+                if (grid_cell_[line * width_ + column]->organism_ != nullptr) {
                     living_one++;
                 }
             }
@@ -110,6 +121,10 @@ void World::run_evolution() {
     }
 }
 
+/**
+ * Parcours toutes les case du monde et calcules les nouvelles données de toutes les cellules
+ *
+ */
 void World::evolution_step() {
     death_ = 0;
     new_mutant_ = 0;
@@ -117,109 +132,112 @@ void World::evolution_step() {
     min_fitness_ = 1;
     max_fitness_ = 0;
 
-    Organism *best;
+    int line = 0;
+    int column = 0;
 
-    for (int i = 0; i < width_; i++) {
-        for (int j = 0; j < height_; j++) {
-            if (grid_cell_[i * width_ + j]->organism_ != nullptr) {
-                grid_cell_[i * width_ + j]->organism_->activate_pump();
-                grid_cell_[i * width_ + j]->organism_->build_regulation_network();
+    //Parcours toutes les cellules
+    for (line = 0; line < width_; line++) {
+        for (column = 0; column < height_; column++) {
+            if (grid_cell_[line * width_ + column]->organism_ != nullptr) {
+                grid_cell_[line * width_ + column]->organism_->activate_pump();
+                grid_cell_[line * width_ + column]->organism_->build_regulation_network();
 
                 for (int t = 0; t < Common::Number_Degradation_Step; t++)
-                    grid_cell_[i * width_ +
-                               j]->organism_->compute_protein_concentration();
+                    grid_cell_[line * width_ + column]->organism_->compute_protein_concentration();
 
-                if (grid_cell_[i * width_ + j]->organism_->dying_or_not()) {
-                    delete grid_cell_[i * width_ + j]->organism_;
-                    grid_cell_[i * width_ + j]->organism_ = nullptr;
+                //Si l'organisme est mort, on libère la mémoire et les pointeurs
+                if (grid_cell_[line * width_ + column]->organism_->dying_or_not()) {
+                    delete grid_cell_[line * width_ + column]->organism_;
+                    grid_cell_[line * width_ + column]->organism_ = nullptr;
                     death_++;
                 }
             }
         }
     }
-/*
-  printf("Move\n");
-  for (int i = 0; i < width_; i++) {
-    for (int j = 0; j < height_; j++) {
-      if (grid_cell_[i * width_ + j]->organism_ != nullptr) {
-        grid_cell_[i * width_ + j]->organism_->try_to_move();
-      }
-    }
-  }
-*/
-    for (int i = 0; i < width_; i++) {
-        for (int j = 0; j < height_; j++) {
-            if (grid_cell_[i * width_ + j]->organism_ != nullptr) {
 
-                grid_cell_[i * width_ + j]->organism_->compute_fitness();
+    //Parcours toutes les cellules, calcul leurs fitness et recherche la fitness max et min
+    //TODO la recheche empêche l'optimisation ?
+    //TODO du coup on peut peux être optimier en sortant le recherche du min max, et parraléliser le compute_fiteness
+    for (line = 0; line < width_; line++) {
+        for (column = 0; column < height_; column++) {
+            if (grid_cell_[line * width_ + column]->organism_ != nullptr) {
 
-                max_fitness_ = grid_cell_[i * width_ + j]->organism_->fitness_ >
-                               max_fitness_ ? grid_cell_[i * width_ +
-                                                         j]->organism_->fitness_
-                                            : max_fitness_;
-                min_fitness_ = grid_cell_[i * width_ + j]->organism_->fitness_ <
-                               min_fitness_ ? grid_cell_[i * width_ +
-                                                         j]->organism_->fitness_
-                                            : min_fitness_;
+                grid_cell_[line * width_ + column]->organism_->compute_fitness();
+
+
+                max_fitness_ = (grid_cell_[line * width_ + column]->organism_->fitness_ > max_fitness_)
+                               ? grid_cell_[line * width_ + column]->organism_->fitness_ : max_fitness_;
+
+                min_fitness_ = (grid_cell_[line * width_ + column]->organism_->fitness_ < min_fitness_)
+                               ? grid_cell_[line * width_ + column]->organism_->fitness_ : min_fitness_;
             }
         }
     }
 
-    for (int i = 0; i < width_; i++) {
-        for (int j = 0; j < height_; j++) {
-
-            if (grid_cell_[i * width_ + j]->organism_ == nullptr) {
+    //Parcours toutes les cellules, pour les dupliquer
+    for (line = 0; line < width_; line++) {
+        for (column = 0; column < height_; column++) {
+            if (grid_cell_[line * width_ + column]->organism_ == nullptr) {
                 Organism *org_n = nullptr;
 
-                for (int x = i - Common::Duplicate_Neighbors_Offset;
-                     x <= i + Common::Duplicate_Neighbors_Offset; x++) {
-                    for (int y = j - Common::Duplicate_Neighbors_Offset;
-                         y <= j + Common::Duplicate_Neighbors_Offset; y++) {
-                        if (x >= 0 && x < width_)
-                            if (y >= 0 && y < height_) {
-                                if (grid_cell_[x * width_ + y]->organism_ != nullptr) {
-                                    if (org_n != nullptr)
-                                        org_n = grid_cell_[x * width_ + y]->organism_->fitness_ <
-                                                org_n->fitness_ ? grid_cell_[x * width_ +
-                                                                             y]->organism_
-                                                                : org_n;
-                                    else
-                                        org_n = grid_cell_[x * width_ + y]->organism_;
-                                }
+                for (int x = line - Common::Duplicate_Neighbors_Offset;
+                     x <= line + Common::Duplicate_Neighbors_Offset; x++) {
+
+                    for (int y = column - Common::Duplicate_Neighbors_Offset;
+                         y <= column + Common::Duplicate_Neighbors_Offset; y++) {
+
+                        if (x >= 0 and x < width_ and y >= 0 and y < height_) {
+                            if (grid_cell_[x * width_ + y]->organism_ != nullptr) {
+                                if (org_n != nullptr)
+                                    org_n = (grid_cell_[x * width_ + y]->organism_->fitness_ < org_n->fitness_)
+                                            ? grid_cell_[x * width_ + y]->organism_ : org_n;
+                                else
+                                    org_n = grid_cell_[x * width_ + y]->organism_;
                             }
+                        }
+
                     }
+
                 }
 
                 if (org_n != nullptr) {
                     new_mutant_++;
                     org_n->dupli_success_++;
-                    grid_cell_[i * width_ + j]->organism_ = new Organism(new DNA(org_n->dna_));
-                    grid_cell_[i * width_ + j]->organism_->gridcell_ = grid_cell_[
-                            i * width_ + j];
-                    grid_cell_[i * width_ + j]->organism_->mutate();
-                    grid_cell_[i * width_ + j]->organism_->init_organism();
+
+                    grid_cell_[line * width_ + column]->organism_ = new Organism(new DNA(org_n->dna_));
+                    grid_cell_[line * width_ + column]->organism_->gridcell_ = grid_cell_[line * width_ + column];
+
+                    grid_cell_[line * width_ + column]->organism_->mutate();
+                    grid_cell_[line * width_ + column]->organism_->init_organism();
                 }
             }
         }
     }
 
-
-    for (int i = 0; i < width_; i++) {
-        for (int j = 0; j < height_; j++) {
-            grid_cell_[i * width_ + j]->diffuse_protein();
-            grid_cell_[i * width_ + j]->degrade_protein();
+    //Parcours toutes les cellules et diffuse et degrade les protéines
+    //TODO à optimiser
+    for (line = 0; line < width_; line++) {
+        for (column = 0; column < height_; column++) {
+            grid_cell_[line * width_ + column]->diffuse_protein();
+            grid_cell_[line * width_ + column]->degrade_protein();
         }
     }
 }
 
+/**
+ * Not used for now
+ */
 void World::test_mutate() {
 
     float fitness = 0.0;
+
     Organism *org = nullptr;
     DNA *dna = nullptr;
+
     printf("Searching for a viable organism ");
 
     long i = 0;
+
     while (fitness <= 0.0) {
         delete org;
         dna = new DNA(grid_cell_[0]);
@@ -233,7 +251,6 @@ void World::test_mutate() {
         fitness = org->fitness_;
         printf(".");
         delete dna;
-        //if (i%100==0) printf(".");
         i++;
     }
 
@@ -245,11 +262,6 @@ void World::test_mutate() {
     int worse = 0;
     int equal = 0;
 
-    int dna_size_larger = 0;
-    int dna_size_equal = 0;
-    int dna_size_smaller = 0;
-
-    // TEST MUTATE (1,000,000)
     for (int i = 0; i < 10000; i++) {
         if (i % 1000 == 0) printf("%d\n", i);
 
@@ -282,6 +294,9 @@ void World::test_mutate() {
     printf("Death %d -- Worse %d -- Better %d -- Equal %d\n", death_, worse, better, equal);
 }
 
+/**
+ * Récupère des statistique sur le monde
+ */
 void World::stats() {
     Organism *best;
     float best_fitness = 1000;
@@ -303,32 +318,35 @@ void World::stats() {
     float avg_dupli_sucess = 0;
     float nb_indiv = 0;
 
-    for (int i = 0; i < width_; i++) {
-        for (int j = 0; j < height_; j++) {
-
-            if (grid_cell_[i * width_ + j]->organism_ != nullptr) {
-                if (grid_cell_[i * width_ + j]->organism_->fitness_ < best_fitness) {
-                    best = grid_cell_[i * width_ + j]->organism_;
-                    best_fitness = grid_cell_[i * width_ + j]->organism_->fitness_;
+    //TODO à optimiser
+    //
+    for (int line = 0; line < width_; line++) {
+        for (int column = 0; column < height_; column++) {
+            //Si la cellule en cours n'est pas morte
+            if (grid_cell_[line * width_ + column]->organism_ != nullptr) {
+                if (grid_cell_[line * width_ + column]->organism_->fitness_ < best_fitness) {
+                    best = grid_cell_[line * width_ + column]->organism_;
+                    best_fitness = grid_cell_[line * width_ + column]->organism_->fitness_;
                 }
 
                 nb_indiv++;
 
-                avg_fitness += grid_cell_[i * width_ + j]->organism_->fitness_;
-                avg_meta_error += grid_cell_[i * width_ + j]->organism_->sum_metabolic_error;
-                avg_dna_size += grid_cell_[i * width_ + j]->organism_->dna_->bp_list_.size();
-                avg_protein += grid_cell_[i * width_ + j]->organism_->protein_list_map_.size();
-                avg_protein_fitness += grid_cell_[i * width_ + j]->organism_->protein_fitness_list_.size();
-                avg_protein_pure_TF += grid_cell_[i * width_ + j]->organism_->protein_TF_list_.size();
-                avg_protein_poison += grid_cell_[i * width_ + j]->organism_->protein_poison_list_.size();
-                avg_protein_anti_poison += grid_cell_[i * width_ + j]->organism_->protein_antipoison_list_.size();
-                avg_pump += grid_cell_[i * width_ + j]->organism_->pump_list_.size();
-                avg_move += grid_cell_[i * width_ + j]->organism_->move_list_.size();
-                avg_nb_rna += grid_cell_[i * width_ + j]->organism_->rna_list_.size();
-                avg_network_size += grid_cell_[i * width_ + j]->organism_->rna_influence_.size();
-                avg_life_duration += grid_cell_[i * width_ + j]->organism_->life_duration_;
-                avg_move_success += grid_cell_[i * width_ + j]->organism_->move_success_;
-                avg_dupli_sucess += grid_cell_[i * width_ + j]->organism_->dupli_success_;
+                avg_fitness += grid_cell_[line * width_ + column]->organism_->fitness_;
+                avg_meta_error += grid_cell_[line * width_ + column]->organism_->sum_metabolic_error;
+                avg_dna_size += grid_cell_[line * width_ + column]->organism_->dna_->bp_list_.size();
+                avg_protein += grid_cell_[line * width_ + column]->organism_->protein_list_map_.size();
+                avg_protein_fitness += grid_cell_[line * width_ + column]->organism_->protein_fitness_list_.size();
+                avg_protein_pure_TF += grid_cell_[line * width_ + column]->organism_->protein_TF_list_.size();
+                avg_protein_poison += grid_cell_[line * width_ + column]->organism_->protein_poison_list_.size();
+                avg_protein_anti_poison += grid_cell_[line * width_ +
+                                                      column]->organism_->protein_antipoison_list_.size();
+                avg_pump += grid_cell_[line * width_ + column]->organism_->pump_list_.size();
+                avg_move += grid_cell_[line * width_ + column]->organism_->move_list_.size();
+                avg_nb_rna += grid_cell_[line * width_ + column]->organism_->rna_list_.size();
+                avg_network_size += grid_cell_[line * width_ + column]->organism_->rna_influence_.size();
+                avg_life_duration += grid_cell_[line * width_ + column]->organism_->life_duration_;
+                avg_move_success += grid_cell_[line * width_ + column]->organism_->move_success_;
+                avg_dupli_sucess += grid_cell_[line * width_ + column]->organism_->dupli_success_;
             }
         }
     }

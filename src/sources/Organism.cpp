@@ -36,7 +36,7 @@ void Organism::translate_protein() {
             } else if ((*it_j)->type_ == (int) BP::BP_Type::END_PROTEIN) {
                 binding_pattern = -1;
             } else if (((*it_j)->type_ ==
-                        (int) BP::BP_Type::PROTEIN_BLOCK) && (binding_pattern != -1)) {
+                        (int) BP::BP_Type::PROTEIN_BLOCK) and (binding_pattern != -1)) {
                 bool current_float = false; // true == next value if op arith else float
                 bool first_value = true; // current_value is initialized or not
                 float current_value = -1;
@@ -53,12 +53,12 @@ void Organism::translate_protein() {
                         }
                     } else if ((*it_k)->type_ ==
                                (int) BP_Protein::BP_Protein_Type::FLOAT_NUMBER) {
-                        if ((!current_float) && first_value) {
+                        if ((!current_float) and first_value) {
                             current_value =
                                     (*it_k)->number_;
                             current_float = true;
                             first_value = false;
-                        } else if ((!current_float) && (!first_value)) {
+                        } else if ((!current_float) and (!first_value)) {
                             float value = (*it_k)->number_;
 
                             current_float = true;
@@ -78,11 +78,11 @@ void Organism::translate_protein() {
                 int type = -1;
                 if (current_value < 0.8) {
                     type = (int) Protein::Protein_Type::FITNESS;
-                } else if (current_value >= 0.8 && current_value < 0.9) {
+                } else if (current_value >= 0.8 and current_value < 0.9) {
                     type = (int) Protein::Protein_Type::TF;
-                } else if (current_value >= 0.9 && current_value < 0.95) {
+                } else if (current_value >= 0.9 and current_value < 0.95) {
                     type = (int) Protein::Protein_Type::POISON;
-                } else if (current_value >= 0.95 && current_value < 1.0) {
+                } else if (current_value >= 0.95 and current_value < 1.0) {
                     type = (int) Protein::Protein_Type::ANTIPOISON;
                 }
 
@@ -129,7 +129,7 @@ void Organism::translate_pump() {
                        (int) BP::BP_Type::END_PUMP) {
                 within_pump = false;
             } else if (((*it_j)->type_ ==
-                        (int) BP::BP_Type::PUMP_BLOCK) && (within_pump)) {
+                        (int) BP::BP_Type::PUMP_BLOCK) and (within_pump)) {
                 for (auto it_k = (*it_j)->pump_block_->bp_pump_list_.begin(); it_k < (*it_j)->pump_block_->
                         bp_pump_list_.end(); it_k++) {
                     Pump *pump = new Pump((*it_k)->in_out_, (*it_k)->start_range_,
@@ -153,7 +153,7 @@ void Organism::translate_move() {
                        (int) BP::BP_Type::END_MOVE) {
                 within_move = false;
             } else if (((*it_j)->type_ ==
-                        (int) BP::BP_Type::MOVE_BLOCK) && (within_move)) {
+                        (int) BP::BP_Type::MOVE_BLOCK) and (within_move)) {
                 for (auto it_k = (*it_j)->move_block_->
                         bp_move_list_.begin(); it_k < (*it_j)->move_block_->
                         bp_move_list_.end(); it_k++) {
@@ -166,6 +166,14 @@ void Organism::translate_move() {
 
 }
 
+/**
+ * 4.4 Réseau métabolique
+ *
+ * Construit le graphe de dépendances d'ADN
+ * Chaque ARN et chaque prot´eine contienne un motif qui permet de calculer le taux de fixation. Ce taux de
+ * fixation (de la proteine sur l’ARN) permet d’influencer la quantit´e (concentration) produite par chaque
+ * ARN
+ */
 void Organism::build_regulation_network() {
     int rna_id = 0;
     for (auto it = rna_list_.begin(); it != rna_list_.end(); it++) {
@@ -197,46 +205,42 @@ void Organism::compute_next_step() {
     compute_protein_concentration();
 }
 
-
+/**
+ * Pour toutes les pompes de l'organisme, on fait les trucs
+ */
 void Organism::activate_pump() {
     for (auto it = pump_list_.begin(); it != pump_list_.end(); it++) {
         if ((*it)->in_out_) {
             for (auto prot : protein_list_map_) {
-                if ((*it)->start_range_ >= prot.second->value_ &&
-                    (*it)->end_range_ <= prot.second->value_) {
-                    float remove =
-                            prot.second->concentration_ * ((*it)->speed_ / 100);
+                if ((*it)->start_range_ >= prot.second->value_ and (*it)->end_range_ <= prot.second->value_) {
+                    float remove = prot.second->concentration_ * ((*it)->speed_ / 100);
                     prot.second->concentration_ -= remove;
-                    if (gridcell_->protein_list_map_.find(prot.second->value_)
-                        == gridcell_->protein_list_map_.end()) {
+
+                    if (gridcell_->protein_list_map_.find(prot.second->value_) == gridcell_->protein_list_map_.end()) {
                         Protein *prot_n = new Protein(prot.second->type_,
                                                       prot.second->binding_pattern_,
                                                       prot.second->value_);
                         prot_n->concentration_ = remove;
                         gridcell_->protein_list_map_[prot.second->value_] = prot_n;
                     } else {
-                        gridcell_->protein_list_map_[prot.second->value_]
-                                ->concentration_ += remove;
+                        gridcell_->protein_list_map_[prot.second->value_]->concentration_ += remove;
                     }
                 }
             }
         } else {
             for (auto prot : gridcell_->protein_list_map_) {
-                if ((*it)->start_range_ >= prot.first &&
-                    (*it)->end_range_ <= prot.first) {
-                    float remove =
-                            prot.second->concentration_ * ((*it)->speed_ / 100);
+                if ((*it)->start_range_ >= prot.first and (*it)->end_range_ <= prot.first) {
+                    float remove = prot.second->concentration_ * ((*it)->speed_ / 100);
                     prot.second->concentration_ -= remove;
-                    if (protein_list_map_.find(prot.first)
-                        == protein_list_map_.end()) {
+
+                    if (protein_list_map_.find(prot.first) == protein_list_map_.end()) {
                         Protein *prot_n = new Protein(prot.second->type_,
                                                       prot.second->binding_pattern_,
                                                       prot.second->value_);
                         prot_n->concentration_ = remove;
                         protein_list_map_[prot_n->value_] = prot_n;
                     } else {
-                        protein_list_map_[prot.first]
-                                ->concentration_ += remove;
+                        protein_list_map_[prot.first]->concentration_ += remove;
                     }
                 }
             }
@@ -253,8 +257,11 @@ void Organism::init_organism() {
 
 void Organism::compute_protein_concentration() {
     int rna_id = 0;
+
+    //TODO à optimiser, mais je sais pas trop comment
     for (auto it = rna_list_.begin(); it != rna_list_.end(); it++) {
         float delta_pos = 0, delta_neg = 0;
+
         for (auto prot : rna_influence_[rna_id]) {
             if (prot.second > 0)
                 delta_pos += prot.second * protein_list_map_[prot.first]->concentration_;
@@ -276,6 +283,7 @@ void Organism::compute_protein_concentration() {
     }
 
     std::unordered_map<float, float> delta_concentration;
+
     for (auto rna : rna_produce_protein_) {
         for (auto prot : rna_produce_protein_[rna.first]) {
             if (delta_concentration.find(prot.first) == delta_concentration.end()) {
@@ -304,7 +312,7 @@ bool Organism::dying_or_not() {
         concentration_sum += prot->concentration_;
     }
 
-    if (concentration_sum > 10.0 && concentration_sum <= 0.0) {
+    if (concentration_sum > 10.0 and concentration_sum <= 0.0) {
         return true;
     }
 
@@ -337,7 +345,7 @@ void Organism::try_to_move() {
             bool move = false;
             int retry = 0;
             std::uniform_int_distribution<uint32_t> dis_distance(0, (*it)->distance_);
-            while (retry < (*it)->retry_ && !move) {
+            while (retry < (*it)->retry_ and !move) {
                 int x_offset = dis_distance(gridcell_->float_gen_);
                 int y_offset = dis_distance(gridcell_->float_gen_);
                 int new_x, new_y;
@@ -365,26 +373,30 @@ void Organism::try_to_move() {
     }
 }
 
+/**
+ * Dépuis la fitness de l'organisme.
+ *
+ * L’adaptation à l’environement est calcul´e en faisant la soustraction des valeurs des prot´eines de l’organisme
+ * et celle de l’environement. Cela donne l’erreur m´etabolique. Celle-ci est ensuite utilis´ee pour calculer la
+ * fitness.
+ */
 void Organism::compute_fitness() {
     life_duration_++;
 
     for (int i = 0; i < Common::Metabolic_Error_Precision; i++)
         metabolic_error[i] = 0.0;
 
-    for (auto prot : protein_fitness_list_) { //.begin(); it != protein_fitness_list_.end(); it++) {
+    for (auto prot : protein_fitness_list_) {
         int index = prot->value_ * Common::Metabolic_Error_Precision;
 
         float concentration = prot->concentration_;
 
-        for (int j = index - Common::Metabolic_Error_Protein_Spray;
-             j <= index + Common::Metabolic_Error_Protein_Spray; j++) {
-            if (j < Common::Metabolic_Error_Precision && j >= 0) {
+        for (int j = index - Common::Metabolic_Error_Protein_Spray; j <= index + Common::Metabolic_Error_Protein_Spray; j++) {
+            if (j < Common::Metabolic_Error_Precision and j >= 0) {
                 if (j < index) {
-                    metabolic_error[j] +=
-                            (index - j) * Common::Metabolic_Error_Protein_Slope * concentration;
+                    metabolic_error[j] += (index - j) * Common::Metabolic_Error_Protein_Slope * concentration;
                 } else if (j > index) {
-                    metabolic_error[j] +=
-                            (j - index) * Common::Metabolic_Error_Protein_Slope * concentration;
+                    metabolic_error[j] += (j - index) * Common::Metabolic_Error_Protein_Slope * concentration;
                 } else {
                     metabolic_error[j] += concentration;
                 }

@@ -34,13 +34,15 @@ public:
     uint32_t global_seed_;
     std::mt19937 global_gen_;
 
-
+    //La grille contenant toutes les cellues du monde
     GridCell **grid_cell_;
 
     int time_;
 
     float min_fitness_, max_fitness_;
+    //Nombre de cellules mortes
     int death_;
+    //Nombre de cellules mutants
     int new_mutant_;
     std::ofstream statfile_best_;
     std::ofstream statfile_mean_;

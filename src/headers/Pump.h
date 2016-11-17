@@ -5,7 +5,9 @@
 #ifndef PDC_EVOL_MODEL_PUMP_H
 #define PDC_EVOL_MODEL_PUMP_H
 
-
+/**
+ * Une pompe de protéine associé à un organisme
+ */
 class Pump {
 public:
     Pump(bool in_out, float start_range, float end_range, int speed) {
@@ -22,9 +24,16 @@ public:
         speed_ = pump->speed_;
     }
 
+    //Si la pompe prend des valeurs dans l'environement
     bool in_out_ = false;
+
+    //Début de l'effet de la pompe
     float start_range_ = -1;
+    //Fin de l'effet de la pompe
     float end_range_ = -1;
+
+    //code la rapiditée de la pompe
+    //(le pourcentage de concentration des proteines qui est pris par la pompe à chaque pas de temps)
     int speed_ = -1;
 };
 
