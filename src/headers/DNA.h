@@ -10,23 +10,24 @@
 #include "BP.h"
 
 class DNA {
- public:
-    DNA(DNA* dna) {
-      for (auto bp : dna->bp_list_) {
-        bp_list_.push_back(new BP(bp));
-      }
+public:
+    DNA(DNA *dna) {
+        for (auto bp : dna->bp_list_) {
+            bp_list_.push_back(new BP(bp));
+        }
     }; // Clone
-    DNA(GridCell* grid_cell); // Random one
+    DNA(GridCell *grid_cell); // Random one
     ~DNA() {
-      for (auto bp : bp_list_)
-        delete bp;
-      bp_list_.clear();
+        for (auto bp : bp_list_)
+            delete bp;
+        bp_list_.clear();
     }
 
-    std::vector<BP*> bp_list_;
+    std::vector<BP *> bp_list_;
 
-    void insert_a_BP(int pos, GridCell* grid_cell);
-    void modify_bp(int pos, GridCell* grid_cell);
+    void insert_a_BP(int pos, GridCell *grid_cell);
+
+    void modify_bp(int pos, GridCell *grid_cell);
 };
 
 

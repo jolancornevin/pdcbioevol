@@ -16,10 +16,16 @@
 class GridCell;
 
 class World {
- public:
+public:
     World(int width, int height, uint32_t seed);
-    ~World() { statfile_best_.close(); statfile_mean_.close(); }
+
+    ~World() {
+        statfile_best_.close();
+        statfile_mean_.close();
+    }
+
     void random_population();
+
     void test_mutate();
 
     int width_;
@@ -29,11 +35,11 @@ class World {
     std::mt19937 global_gen_;
 
 
-    GridCell** grid_cell_;
+    GridCell **grid_cell_;
 
     int time_;
 
-    float min_fitness_,max_fitness_;
+    float min_fitness_, max_fitness_;
     int death_;
     int new_mutant_;
     std::ofstream statfile_best_;

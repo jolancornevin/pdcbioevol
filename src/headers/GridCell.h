@@ -12,18 +12,20 @@
 #include "Common.h"
 
 class Organism;
+
 class GridCell {
- public:
-    GridCell(World* world, int x, int y, uint32_t seed) {
-      world_ = world;
-      x_=x; y_=y;
-      float_gen_.seed(seed);
+public:
+    GridCell(World *world, int x, int y, uint32_t seed) {
+        world_ = world;
+        x_ = x;
+        y_ = y;
+        float_gen_.seed(seed);
 
     };
 
-    World* world_;
-    std::unordered_map<float,Protein*> protein_list_map_;
-    Organism* organism_ = nullptr;
+    World *world_;
+    std::unordered_map<float, Protein *> protein_list_map_;
+    Organism *organism_ = nullptr;
     float environment_target[Common::Metabolic_Error_Precision];
 
     int x_;
@@ -32,8 +34,10 @@ class GridCell {
     std::mt19937 float_gen_;
 
     void diffuse_protein();
+
     void degrade_protein();
-    void push_new_protein(std::vector<Protein*> protein_list);
+
+    void push_new_protein(std::vector<Protein *> protein_list);
 };
 
 

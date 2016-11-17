@@ -9,7 +9,7 @@
 #include "BP_Protein.h"
 
 class Common {
- public:
+public:
     const static int DNA_base_length = 500;
 
     const static int BP_Protein_base_length = 50;
@@ -22,10 +22,12 @@ class Common {
     const static int BINDING_MATRIX_SIZE = 1000;
     const static int BINDING_MATRIX_ZERO_PERCENT = 75;
 
-    static float matrix_binding_[BINDING_MATRIX_SIZE*BINDING_MATRIX_SIZE];
+    static float matrix_binding_[BINDING_MATRIX_SIZE * BINDING_MATRIX_SIZE];
 
     static void init_binding_matrix(uint32_t seed);
+
     static void save_binding_matrix();
+
     static void load_binding_matrix();
 
     const static uint32_t Pump_Max_Speed = 20;
@@ -34,7 +36,7 @@ class Common {
     constexpr static float hill_shape_n = 0.0625;
     constexpr static float Protein_Degradation_Rate = 0.01;
     const static int Protein_Degradation_Step = 10;
-    constexpr static float Random_Death  = 1e-5;
+    constexpr static float Random_Death = 1e-5;
 
     const static int Duplicate_Neighbors_Offset = 1;
 

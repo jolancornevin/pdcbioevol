@@ -7,7 +7,7 @@
 
 
 class BP_Protein {
- public:
+public:
     enum class BP_Protein_Type {
         ARITHMETIC_OPERATOR = 0,
         FLOAT_NUMBER = 1
@@ -21,19 +21,19 @@ class BP_Protein {
     };
 
     BP_Protein(int type, int op) {
-      type_ = type;
-      op_ = op;
+        type_ = type;
+        op_ = op;
     };
 
     BP_Protein(int type, float number) {
-      type_  = type;
-      number_ = number;
+        type_ = type;
+        number_ = number;
     }
 
-    BP_Protein(BP_Protein* bp_protein) {
-      type_ = bp_protein->type_;
-      op_ = bp_protein->op_;
-      number_ = bp_protein->number_;
+    BP_Protein(BP_Protein *bp_protein) {
+        type_ = bp_protein->type_;
+        op_ = bp_protein->op_;
+        number_ = bp_protein->number_;
     }
 
     int type_;

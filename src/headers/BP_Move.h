@@ -7,15 +7,15 @@
 
 
 class BP_Move {
- public:
+public:
     BP_Move(int distance, int retry) {
-      distance_ = distance;
-      retry_ = distance;
+        distance_ = distance;
+        retry_ = distance;
     };
 
-    BP_Move(BP_Move* bp_pump) {
-      retry_ = bp_pump->retry_;
-      distance_ = bp_pump->distance_;
+    BP_Move(BP_Move *bp_pump) {
+        retry_ = bp_pump->retry_;
+        distance_ = bp_pump->distance_;
     };
 
     int distance_;

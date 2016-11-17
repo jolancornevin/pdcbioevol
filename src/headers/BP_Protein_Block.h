@@ -12,11 +12,11 @@
 #include "BP_Protein.h"
 
 class BP_Protein_Block {
- public:
-    BP_Protein_Block(BP_Protein_Block* bp_prot) {
-      for (auto prot : bp_prot->bp_prot_list_) {
-        bp_prot_list_.push_back(new BP_Protein(prot));
-      }
+public:
+    BP_Protein_Block(BP_Protein_Block *bp_prot) {
+        for (auto prot : bp_prot->bp_prot_list_) {
+            bp_prot_list_.push_back(new BP_Protein(prot));
+        }
     };
 
     BP_Protein_Block() {
@@ -24,13 +24,16 @@ class BP_Protein_Block {
     };
 
     ~BP_Protein_Block() {
-      for (auto prot : bp_prot_list_) {
-        if (prot == nullptr) { printf("NO:");exit(-1);}
-        delete prot;
-      }
+        for (auto prot : bp_prot_list_) {
+            if (prot == nullptr) {
+                printf("NO:");
+                exit(-1);
+            }
+            delete prot;
+        }
     }
 
-    std::vector<BP_Protein*> bp_prot_list_;
+    std::vector<BP_Protein *> bp_prot_list_;
 };
 
 

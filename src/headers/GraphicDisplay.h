@@ -11,16 +11,17 @@
 #include "World.h"
 
 class GraphicDisplay {
- public:
-    GraphicDisplay(World* world);
+public:
+    GraphicDisplay(World *world);
+
     ~GraphicDisplay();
 
-    World* world_;
+    World *world_;
 
-    sf::RenderWindow   _pop_window;   /*!< Population render window   */
-    sf::RectangleShape* _lattice;      /*!< Lattice shape              */
-    sf::RectangleShape* _cell;         /*!< Cell shape                 */
-    sf::Vertex*         _pop_gradient; /*!< Population color gradient  */
+    sf::RenderWindow _pop_window;   /*!< Population render window   */
+    sf::RectangleShape *_lattice;      /*!< Lattice shape              */
+    sf::RectangleShape *_cell;         /*!< Cell shape                 */
+    sf::Vertex *_pop_gradient; /*!< Population color gradient  */
 
     void build_gradients(size_t size);
 

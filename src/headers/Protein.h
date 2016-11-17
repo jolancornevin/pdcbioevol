@@ -7,7 +7,7 @@
 
 
 class Protein {
- public:
+public:
     enum class Protein_Type {
         FITNESS = 0,
         TF = 1,
@@ -16,17 +16,17 @@ class Protein {
     };
 
     Protein(int type, float binding_pattern, float value) {
-      type_ = type;
-      binding_pattern_ = binding_pattern;
-      value_ = value;
-      concentration_ = 0;
+        type_ = type;
+        binding_pattern_ = binding_pattern;
+        value_ = value;
+        concentration_ = 0;
     }
 
-    Protein(Protein* prot) {
-      type_ = prot->type_;
-      binding_pattern_ = prot->binding_pattern_;
-      value_ = prot->value_;
-      concentration_ = prot->concentration_;
+    Protein(Protein *prot) {
+        type_ = prot->type_;
+        binding_pattern_ = prot->binding_pattern_;
+        value_ = prot->value_;
+        concentration_ = prot->concentration_;
     }
 
     int type_ = -1;

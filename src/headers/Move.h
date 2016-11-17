@@ -7,15 +7,15 @@
 
 
 class Move {
- public:
+public:
     Move(int distance, int retry) {
-      distance_ = distance;
-      retry_ = retry;
+        distance_ = distance;
+        retry_ = retry;
     }
 
-    Move(Move* move) {
-      distance_ = move->distance_;
-      retry_ = move->retry_;
+    Move(Move *move) {
+        distance_ = move->distance_;
+        retry_ = move->retry_;
     }
 
     int distance_ = -1;

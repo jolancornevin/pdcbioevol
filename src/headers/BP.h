@@ -11,7 +11,7 @@
 #include "BP_Move_Block.h"
 
 class BP {
- public:
+public:
     enum class BP_Type {
         START_RNA = 0,
         END_RNA = 1,
@@ -34,62 +34,62 @@ class BP {
     /**
      * Constructor for BP Protein Block
      */
-    BP(int type, BP_Protein_Block* protein_block) {
-      type_ = type;
-      protein_block_ = protein_block;
+    BP(int type, BP_Protein_Block *protein_block) {
+        type_ = type;
+        protein_block_ = protein_block;
     }
 
     /**
      * Constructor for BP Pump Block
      */
-    BP(int type, BP_Pump_Block* pump_block) {
-      type_ = type;
-      pump_block_ = pump_block;
+    BP(int type, BP_Pump_Block *pump_block) {
+        type_ = type;
+        pump_block_ = pump_block;
     }
 
     /**
      * Constructor for BP Move Block
      */
-    BP(int type, BP_Move_Block* move_block) {
-      type_ = type;
-      move_block_ = move_block;
+    BP(int type, BP_Move_Block *move_block) {
+        type_ = type;
+        move_block_ = move_block;
     }
 
     /**
      * Constructor for START_RNA BP
      */
     BP(int type, float binding_pattern, float concentration) {
-      type_ = type;
-      binding_pattern_ = binding_pattern;
-      concentration_ = concentration;
+        type_ = type;
+        binding_pattern_ = binding_pattern;
+        concentration_ = concentration;
     }
 
     /**
      * Constructor for START_PROTEIN BP
      */
     BP(int type, float binding_pattern) {
-      type_ = type;
-      binding_pattern_ = binding_pattern;
+        type_ = type;
+        binding_pattern_ = binding_pattern;
     }
 
-    BP(BP* bp) {
-      type_ = bp->type_;
-      binding_pattern_ = bp->binding_pattern_;
-      concentration_ = bp->concentration_;
+    BP(BP *bp) {
+        type_ = bp->type_;
+        binding_pattern_ = bp->binding_pattern_;
+        concentration_ = bp->concentration_;
 
-      if (bp->protein_block_ != nullptr) {
-        protein_block_ = new BP_Protein_Block(bp->protein_block_);
-      } else if (bp->pump_block_ != nullptr) {
-        pump_block_ = new BP_Pump_Block(bp->pump_block_);
-      } else if (bp->move_block_ != nullptr) {
-        move_block_ = new BP_Move_Block(bp->move_block_);
-      }
+        if (bp->protein_block_ != nullptr) {
+            protein_block_ = new BP_Protein_Block(bp->protein_block_);
+        } else if (bp->pump_block_ != nullptr) {
+            pump_block_ = new BP_Pump_Block(bp->pump_block_);
+        } else if (bp->move_block_ != nullptr) {
+            move_block_ = new BP_Move_Block(bp->move_block_);
+        }
     }
 
     ~BP() {
-      delete protein_block_;
-      delete pump_block_;
-      delete move_block_;
+        delete protein_block_;
+        delete pump_block_;
+        delete move_block_;
     }
 
     int type_;
@@ -97,9 +97,9 @@ class BP {
     float binding_pattern_;
     float concentration_;
 
-    BP_Protein_Block* protein_block_ = nullptr;
-    BP_Pump_Block* pump_block_ = nullptr;
-    BP_Move_Block* move_block_ = nullptr;
+    BP_Protein_Block *protein_block_ = nullptr;
+    BP_Pump_Block *pump_block_ = nullptr;
+    BP_Move_Block *move_block_ = nullptr;
 };
 
 

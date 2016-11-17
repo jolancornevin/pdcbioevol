@@ -10,23 +10,23 @@
 #include "BP_Pump.h"
 
 class BP_Pump_Block {
- public:
-    BP_Pump_Block(BP_Pump_Block* bp_prot) {
-      for (auto pump : bp_prot->bp_pump_list_) {
-        bp_pump_list_.push_back(new BP_Pump(pump));
-      }
+public:
+    BP_Pump_Block(BP_Pump_Block *bp_prot) {
+        for (auto pump : bp_prot->bp_pump_list_) {
+            bp_pump_list_.push_back(new BP_Pump(pump));
+        }
     };
 
     BP_Pump_Block() {
     };
 
     ~BP_Pump_Block() {
-      for (auto pump : bp_pump_list_) {
-        delete pump;
-      }
+        for (auto pump : bp_pump_list_) {
+            delete pump;
+        }
     }
 
-    std::vector<BP_Pump*> bp_pump_list_;
+    std::vector<BP_Pump *> bp_pump_list_;
 };
 
 
