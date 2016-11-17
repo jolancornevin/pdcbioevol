@@ -5,7 +5,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules" ${CMAKE_MODULE_PATH})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g")
 
-set(SOURCE_FILES main.cpp src/World.cpp src/World.h src/GridCell.cpp src/GridCell.h src/Organism.cpp src/Organism.h src/DNA.cpp src/DNA.h src/BP.cpp src/BP.h src/BP_Protein_Block.cpp src/BP_Protein_Block.h src/BP_Protein.cpp src/BP_Protein.h src/BP_Pump_Block.cpp src/BP_Pump_Block.h src/BP_Pump.cpp src/BP_Pump.h src/BP_Move_Block.cpp src/BP_Move_Block.h src/BP_Move.cpp src/BP_Move.h src/RNA.cpp src/RNA.h src/Protein.cpp src/Protein.h src/Move.cpp src/Move.h src/Pump.cpp src/Pump.h src/Common.cpp src/Common.h src/GraphicDisplay.cpp src/GraphicDisplay.h)
+set(SOURCE_FILES main.cpp src/sources/World.cpp src/headers/World.h src/sources/GridCell.cpp src/headers/GridCell.h src/sources/Organism.cpp src/headers/Organism.h src/sources/DNA.cpp src/headers/DNA.h src/sources/BP.cpp src/headers/BP.h src/sources/BP_Protein_Block.cpp src/headers/BP_Protein_Block.h src/sources/BP_Protein.cpp src/headers/BP_Protein.h src/sources/BP_Pump_Block.cpp src/headers/BP_Pump_Block.h src/sources/BP_Pump.cpp src/headers/BP_Pump.h src/sources/BP_Move_Block.cpp src/headers/BP_Move_Block.h src/sources/BP_Move.cpp src/headers/BP_Move.h src/sources/RNA.cpp src/headers/RNA.h src/sources/Protein.cpp src/headers/Protein.h src/sources/Move.cpp src/headers/Move.h src/sources/Pump.cpp src/headers/Pump.h src/sources/Common.cpp src/headers/Common.h src/sources/GraphicDisplay.cpp src/headers/GraphicDisplay.h)
 add_executable(pdc_evol_model ${SOURCE_FILES})
 
 find_package(SFML 2 REQUIRED graphics window system)

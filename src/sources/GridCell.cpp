@@ -2,8 +2,8 @@
 // Created by arrouan on 28/09/16.
 //
 
-#include "GridCell.h"
-#include "Organism.h"
+#include "../headers/GridCell.h"
+#include "../headers/Organism.h"
 
 void GridCell::diffuse_protein() {
   for (int i = x_ - Common::Diffusion_Neighbors_Size; i <= x_ + Common::Diffusion_Neighbors_Size; i++) {

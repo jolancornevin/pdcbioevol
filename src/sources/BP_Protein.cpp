@@ -2,4 +2,4 @@
 // Created by arrouan on 28/09/16.
 //
 
-#include "BP_Protein.h"
+#include "../headers/BP_Protein.h"

@@ -1,6 +1,6 @@
 #include <iostream>
-#include "src/World.h"
-#include "src/Common.h"
+#include "src/headers/World.h"
+#include "src/headers/Common.h"
 
 using namespace std;
 

@@ -2,10 +2,10 @@
 // Created by arrouan on 28/09/16.
 //
 
-#include "World.h"
-#include "DNA.h"
-#include "Organism.h"
-#include "GraphicDisplay.h"
+#include "../headers/World.h"
+#include "../headers/DNA.h"
+#include "../headers/Organism.h"
+#include "../headers/GraphicDisplay.h"
 
 
 World::World(int width, int height, uint32_t seed) {

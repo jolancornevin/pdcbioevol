@@ -2,10 +2,10 @@
 // Created by arrouan on 14/10/16.
 //
 
-#include "GraphicDisplay.h"
-#include "World.h"
-#include "Common.h"
-#include "Organism.h"
+#include "../headers/GraphicDisplay.h"
+#include "../headers/World.h"
+#include "../headers/Common.h"
+#include "../headers/Organism.h"
 
 GraphicDisplay::GraphicDisplay(World* world) {
   world_ = world;

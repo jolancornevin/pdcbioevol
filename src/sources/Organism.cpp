@@ -2,9 +2,9 @@
 // Created by arrouan on 28/09/16.
 //
 
-#include "Organism.h"
-#include "DNA.h"
-#include "Common.h"
+#include "../headers/Organism.h"
+#include "../headers/DNA.h"
+#include "../headers/Common.h"
 
 
 void Organism::translate_RNA() {

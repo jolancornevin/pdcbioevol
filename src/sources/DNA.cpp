@@ -2,8 +2,8 @@
 // Created by arrouan on 28/09/16.
 //
 
-#include "DNA.h"
-#include "Common.h"
+#include "../headers/DNA.h"
+#include "../headers/Common.h"
 
 DNA::DNA(GridCell* grid_cell) {
 // Create a random individual
