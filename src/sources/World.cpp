@@ -5,7 +5,6 @@
 #include "../headers/World.h"
 #include "../headers/DNA.h"
 #include "../headers/Organism.h"
-#include "../headers/GraphicDisplay.h"
 
 
 World::World(int width, int height, uint32_t seed) {
@@ -89,7 +88,6 @@ void World::init_environment() {
 }
 
 void World::run_evolution() {
-  GraphicDisplay* display = new GraphicDisplay(this);
   while (time_ < Common::Number_Evolution_Step) {
     evolution_step();
     int living_one = 0;
@@ -101,7 +99,6 @@ void World::run_evolution() {
       }
     }
 
-    display->display();
     stats();
     if (time_%100 == 0) {
       printf(
