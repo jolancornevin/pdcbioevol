@@ -1,6 +1,13 @@
 # Perso
 .idea
 CMakeLists.txt
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+pdc_evol_model
+stats_best.txt
+stats_mean.txt
 
 # Compiled Object files
 *.slo
