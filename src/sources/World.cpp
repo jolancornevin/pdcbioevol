@@ -66,13 +66,22 @@ void World::random_population() {
 
     printf("Found !\nFilling the grid\n");
     //TODO à optimiser
+
     for (i = 0; i < width_; i++) {
-        for (int j = 0; j < height_; j++) {
-            grid_cell_[i * width_ + j]->organism_ = new Organism(new DNA(org->dna_));
-            grid_cell_[i * width_ + j]->organism_->init_organism();
-            grid_cell_[i * width_ + j]->organism_->gridcell_ = grid_cell_[i * width_ + j];
+        #pragma omp parallel
+        {
+            #pragma omp for
+            for (int j = 0; j < height_; j++) {
+                grid_cell_[i * width_ + j]->organism_ = new Organism(new DNA(org->dna_));
+                grid_cell_[i * width_ + j]->organism_->init_organism();
+                #pragma omp critical
+                {
+                    grid_cell_[i * width_ + j]->organism_->gridcell_ = grid_cell_[i * width_ + j];
+                }
+            }
         }
     }
+
 
     delete org;
 }
