@@ -16,10 +16,15 @@ int main() {
     clock_t begin = clock();
 
     //Test if openMP is working
+    //TODO à supprimer quand c'est vérifier
     #pragma omp parallel
     {
         int thread_id = omp_get_thread_num();
-        std::cout << "Thread number: " << omp_get_thread_num() << endl;
+        #pragma omp critical
+        {
+            std::cout << "Thread number: " << omp_get_thread_num() << endl;
+        }
+
     }
 
     printf("Init binding matrix\n");
