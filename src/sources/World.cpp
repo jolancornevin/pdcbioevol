@@ -109,7 +109,6 @@ void World::run_evolution() {
 
         int living_one = 0;
         //Compte le nombre de cellules vivantes
-        //TODO à optimiser
         for (int line = 0; line < width_; line++) {
 #pragma omp parallel
             {
@@ -269,8 +268,10 @@ void World::test_mutate() {
         org->gridcell_ = grid_cell_[0];
         org->init_organism();
         org->build_regulation_network();
+
         for (int t = 0; t < Common::Number_Degradation_Step; t++)
             org->compute_protein_concentration();
+
         org->compute_fitness();
         fitness = org->fitness_;
         printf(".");

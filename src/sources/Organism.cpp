@@ -197,6 +197,9 @@ void Organism::build_regulation_network() {
     }
 }
 
+/**
+ * Not used
+ */
 void Organism::compute_next_step() {
     // Activate Pump
     activate_pump();
