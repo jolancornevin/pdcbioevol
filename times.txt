@@ -1,0 +1,18 @@
+without run_evolution : 
+3s
+without run_evolution and with random_population in parallel
+1.5s
+
+with run_evolution for 101 iterations and 1024 organisms:
+13.6s 
+	with count of living cells: 
+	13.3s
+	
+	with pump optimisation (first loop in world:evolution_step())
+	7.12s
+
+
+
+	
+	
+

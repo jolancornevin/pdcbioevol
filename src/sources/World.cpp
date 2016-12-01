@@ -68,13 +68,13 @@ void World::random_population() {
     //TODO à optimiser
 
     for (i = 0; i < width_; i++) {
-        #pragma omp parallel
+#pragma omp parallel
         {
-            #pragma omp for
+#pragma omp for
             for (int j = 0; j < height_; j++) {
                 grid_cell_[i * width_ + j]->organism_ = new Organism(new DNA(org->dna_));
                 grid_cell_[i * width_ + j]->organism_->init_organism();
-                #pragma omp critical
+#pragma omp critical
                 {
                     grid_cell_[i * width_ + j]->organism_->gridcell_ = grid_cell_[i * width_ + j];
                 }
@@ -111,9 +111,16 @@ void World::run_evolution() {
         //Compte le nombre de cellules vivantes
         //TODO à optimiser
         for (int line = 0; line < width_; line++) {
-            for (int column = 0; column < height_; column++) {
-                if (grid_cell_[line * width_ + column]->organism_ != nullptr) {
-                    living_one++;
+#pragma omp parallel
+            {
+#pragma omp for
+                for (int column = 0; column < height_; column++) {
+                    if (grid_cell_[line * width_ + column]->organism_ != nullptr) {
+#pragma omp critical
+                        {
+                            living_one++;
+                        }
+                    }
                 }
             }
         }
@@ -146,26 +153,30 @@ void World::evolution_step() {
 
     //Parcours toutes les cellules
     for (line = 0; line < width_; line++) {
-        for (column = 0; column < height_; column++) {
-            if (grid_cell_[line * width_ + column]->organism_ != nullptr) {
-                grid_cell_[line * width_ + column]->organism_->activate_pump();
-                grid_cell_[line * width_ + column]->organism_->build_regulation_network();
+#pragma omp parallel
+        {
+#pragma omp for
+            for (column = 0; column < height_; column++) {
+                if (grid_cell_[line * width_ + column]->organism_ != nullptr) {
+                    grid_cell_[line * width_ + column]->organism_->activate_pump();
+                    grid_cell_[line * width_ + column]->organism_->build_regulation_network();
 
-                for (int t = 0; t < Common::Number_Degradation_Step; t++)
-                    grid_cell_[line * width_ + column]->organism_->compute_protein_concentration();
+                    for (int t = 0; t < Common::Number_Degradation_Step; t++)
+                        grid_cell_[line * width_ + column]->organism_->compute_protein_concentration();
 
-                //Si l'organisme est mort, on libère la mémoire et les pointeurs
-                if (grid_cell_[line * width_ + column]->organism_->dying_or_not()) {
-                    delete grid_cell_[line * width_ + column]->organism_;
-                    grid_cell_[line * width_ + column]->organism_ = nullptr;
-                    death_++;
+                    //Si l'organisme est mort, on libère la mémoire et les pointeurs
+                    if (grid_cell_[line * width_ + column]->organism_->dying_or_not()) {
+                        delete grid_cell_[line * width_ + column]->organism_;
+                        grid_cell_[line * width_ + column]->organism_ = nullptr;
+                        death_++;
+                    }
                 }
             }
         }
     }
 
     //Parcours toutes les cellules, calcul leurs fitness et recherche la fitness max et min
-    //TODO la recheche empêche l'optimisation ?
+    //TODO la recheche de max et min empêche l'optimisation ?
     //TODO du coup on peut peux être optimier en sortant le recherche du min max, et parraléliser le compute_fiteness
     for (line = 0; line < width_; line++) {
         for (column = 0; column < height_; column++) {
@@ -226,9 +237,13 @@ void World::evolution_step() {
     //Parcours toutes les cellules et diffuse et degrade les protéines
     //TODO à optimiser
     for (line = 0; line < width_; line++) {
-        for (column = 0; column < height_; column++) {
-            grid_cell_[line * width_ + column]->diffuse_protein();
-            grid_cell_[line * width_ + column]->degrade_protein();
+        #pragma omp parallel
+        {
+            #pragma omp for
+            for (column = 0; column < height_; column++) {
+                grid_cell_[line * width_ + column]->diffuse_protein();
+                grid_cell_[line * width_ + column]->degrade_protein();
+            }
         }
     }
 }
