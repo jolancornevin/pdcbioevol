@@ -212,41 +212,48 @@ void Organism::compute_next_step() {
  * Pour toutes les pompes de l'organisme, on fait les trucs
  */
 void Organism::activate_pump() {
-    for (auto it = pump_list_.begin(); it != pump_list_.end(); it++) {
-        if ((*it)->in_out_) {
-            for (auto prot : protein_list_map_) {
-                if ((*it)->start_range_ >= prot.second->value_ and (*it)->end_range_ <= prot.second->value_) {
-                    float remove = prot.second->concentration_ * ((*it)->speed_ / 100);
-                    prot.second->concentration_ -= remove;
+    auto it = pump_list_.begin();
+#pragma omp parallel
+    {
+#pragma omp for
+        for (int i = 0; i < pump_list_.size(); ++i) {
+            if ((*it)->in_out_) {
+                for (auto prot : protein_list_map_) {
+                    if ((*it)->start_range_ >= prot.second->value_ and (*it)->end_range_ <= prot.second->value_) {
+                        float remove = prot.second->concentration_ * ((*it)->speed_ / 100);
+                        prot.second->concentration_ -= remove;
 
-                    if (gridcell_->protein_list_map_.find(prot.second->value_) == gridcell_->protein_list_map_.end()) {
-                        Protein *prot_n = new Protein(prot.second->type_,
-                                                      prot.second->binding_pattern_,
-                                                      prot.second->value_);
-                        prot_n->concentration_ = remove;
-                        gridcell_->protein_list_map_[prot.second->value_] = prot_n;
-                    } else {
-                        gridcell_->protein_list_map_[prot.second->value_]->concentration_ += remove;
+                        if (gridcell_->protein_list_map_.find(prot.second->value_)
+                            == gridcell_->protein_list_map_.end()) {
+                            Protein *prot_n = new Protein(prot.second->type_,
+                                                          prot.second->binding_pattern_,
+                                                          prot.second->value_);
+                            prot_n->concentration_ = remove;
+                            gridcell_->protein_list_map_[prot.second->value_] = prot_n;
+                        } else {
+                            gridcell_->protein_list_map_[prot.second->value_]->concentration_ += remove;
+                        }
+                    }
+                }
+            } else {
+                for (auto prot : gridcell_->protein_list_map_) {
+                    if ((*it)->start_range_ >= prot.first and (*it)->end_range_ <= prot.first) {
+                        float remove = prot.second->concentration_ * ((*it)->speed_ / 100);
+                        prot.second->concentration_ -= remove;
+
+                        if (protein_list_map_.find(prot.first) == protein_list_map_.end()) {
+                            Protein *prot_n = new Protein(prot.second->type_,
+                                                          prot.second->binding_pattern_,
+                                                          prot.second->value_);
+                            prot_n->concentration_ = remove;
+                            protein_list_map_[prot_n->value_] = prot_n;
+                        } else {
+                            protein_list_map_[prot.first]->concentration_ += remove;
+                        }
                     }
                 }
             }
-        } else {
-            for (auto prot : gridcell_->protein_list_map_) {
-                if ((*it)->start_range_ >= prot.first and (*it)->end_range_ <= prot.first) {
-                    float remove = prot.second->concentration_ * ((*it)->speed_ / 100);
-                    prot.second->concentration_ -= remove;
-
-                    if (protein_list_map_.find(prot.first) == protein_list_map_.end()) {
-                        Protein *prot_n = new Protein(prot.second->type_,
-                                                      prot.second->binding_pattern_,
-                                                      prot.second->value_);
-                        prot_n->concentration_ = remove;
-                        protein_list_map_[prot_n->value_] = prot_n;
-                    } else {
-                        protein_list_map_[prot.first]->concentration_ += remove;
-                    }
-                }
-            }
+            it++;
         }
     }
 }
@@ -260,9 +267,9 @@ void Organism::init_organism() {
 
 void Organism::compute_protein_concentration() {
     //TODO à optimiser, mais je sais pas trop comment
-    #pragma omp parallel 
+#pragma omp parallel
     {
-        #pragma omp for
+#pragma omp for
         for (int rna_id = 0; rna_id < rna_list_.size(); rna_id++) {
             float delta_pos = 0, delta_neg = 0;
 
@@ -277,12 +284,12 @@ void Organism::compute_protein_concentration() {
             float delta_neg_pow_n = pow(delta_neg, Common::hill_shape_n);
 
             rna_list_[rna_id]->current_concentration_ = rna_list_[rna_id]->concentration_base_
-                * (Common::hill_shape
-                        / (delta_neg_pow_n + Common::hill_shape))
-                * (1 + ((1 / rna_list_[rna_id]->concentration_base_) - 1)
-                        * (delta_pos_pow_n /
-                            (delta_pos_pow_n +
-                             Common::hill_shape)));
+                                                        * (Common::hill_shape
+                                                           / (delta_neg_pow_n + Common::hill_shape))
+                                                        * (1 + ((1 / rna_list_[rna_id]->concentration_base_) - 1)
+                                                               * (delta_pos_pow_n /
+                                                                  (delta_pos_pow_n +
+                                                                   Common::hill_shape)));
         }
     }
 
@@ -395,7 +402,8 @@ void Organism::compute_fitness() {
 
         float concentration = prot->concentration_;
 
-        for (int j = index - Common::Metabolic_Error_Protein_Spray; j <= index + Common::Metabolic_Error_Protein_Spray; j++) {
+        for (int j = index - Common::Metabolic_Error_Protein_Spray;
+             j <= index + Common::Metabolic_Error_Protein_Spray; j++) {
             if (j < Common::Metabolic_Error_Precision and j >= 0) {
                 if (j < index) {
                     metabolic_error[j] += (index - j) * Common::Metabolic_Error_Protein_Slope * concentration;
