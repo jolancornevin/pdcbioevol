@@ -193,45 +193,51 @@ void World::evolution_step() {
         }
     }
 
-    //Parcours toutes les cellules, pour les dupliquer
     for (line = 0; line < width_; line++) {
-        for (column = 0; column < height_; column++) {
-            if (grid_cell_[line * width_ + column]->organism_ == nullptr) {
-                Organism *org_n = nullptr;
+#pragma omp parallel
+        {
+#pragma omp for
+            for (column = 0; column < height_; column++) {
+                if (grid_cell_[line * width_ + column]->organism_ == nullptr) {
+                    Organism *org_n = nullptr;
 
-                for (int x = line - Common::Duplicate_Neighbors_Offset;
-                     x <= line + Common::Duplicate_Neighbors_Offset; x++) {
+                    for (int x = line - Common::Duplicate_Neighbors_Offset;
+                         x <= line + Common::Duplicate_Neighbors_Offset; x++) {
 
-                    for (int y = column - Common::Duplicate_Neighbors_Offset;
-                         y <= column + Common::Duplicate_Neighbors_Offset; y++) {
+                        for (int y = column - Common::Duplicate_Neighbors_Offset;
+                             y <= column + Common::Duplicate_Neighbors_Offset; y++) {
 
-                        if (x >= 0 and x < width_ and y >= 0 and y < height_) {
-                            if (grid_cell_[x * width_ + y]->organism_ != nullptr) {
-                                if (org_n != nullptr)
-                                    org_n = (grid_cell_[x * width_ + y]->organism_->fitness_ < org_n->fitness_)
-                                            ? grid_cell_[x * width_ + y]->organism_ : org_n;
-                                else
-                                    org_n = grid_cell_[x * width_ + y]->organism_;
+                            if (x >= 0 and x < width_ and y >= 0 and y < height_) {
+                                if (grid_cell_[x * width_ + y]->organism_ != nullptr) {
+                                    if (org_n != nullptr)
+                                        org_n = (grid_cell_[x * width_ + y]->organism_->fitness_ < org_n->fitness_)
+                                                ? grid_cell_[x * width_ + y]->organism_ : org_n;
+                                    else
+                                        org_n = grid_cell_[x * width_ + y]->organism_;
+                                }
                             }
+
                         }
 
                     }
 
-                }
+                    if (org_n != nullptr) {
+                        new_mutant_++;
+                        org_n->dupli_success_++;
+#pragma omp critical
+                        {
+                            grid_cell_[line * width_ + column]->organism_ = new Organism(new DNA(org_n->dna_));
+                            grid_cell_[line * width_ + column]->organism_->gridcell_ = grid_cell_[line * width_ + column];
+                        }
 
-                if (org_n != nullptr) {
-                    new_mutant_++;
-                    org_n->dupli_success_++;
-
-                    grid_cell_[line * width_ + column]->organism_ = new Organism(new DNA(org_n->dna_));
-                    grid_cell_[line * width_ + column]->organism_->gridcell_ = grid_cell_[line * width_ + column];
-
-                    grid_cell_[line * width_ + column]->organism_->mutate();
-                    grid_cell_[line * width_ + column]->organism_->init_organism();
+                        grid_cell_[line * width_ + column]->organism_->mutate();
+                        grid_cell_[line * width_ + column]->organism_->init_organism();
+                    }
                 }
             }
         }
     }
+
 
     //Parcours toutes les cellules et diffuse et degrade les protéines
     //TODO à optimiser
