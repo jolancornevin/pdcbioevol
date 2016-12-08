@@ -1,4 +1,5 @@
 #include <iostream>
+#include "src/headers/helper.h"
 #include "src/headers/World.h"
 #include "src/headers/Common.h"
 #include "src/headers/cpu_time.h"
@@ -36,11 +37,14 @@ int main() {
 		int thread_id = omp_get_thread_num();
 		#pragma omp critical
 		{
-			std::cout << "RANK" << rank << Thread number: " << omp_get_thread_num() << endl;
+			std::cout << "RANK " << rank << " Thread number: " << omp_get_thread_num() << endl;
 		}
 	}
 	
-	if (rank == 1) {
+	set_rank(rank);
+	lolilol();
+	
+	if (rank == 0) {
 		int target_thread_num = 4;
 		omp_set_num_threads(target_thread_num);
 

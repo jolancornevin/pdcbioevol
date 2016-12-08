@@ -5,6 +5,7 @@
 #include "../headers/World.h"
 #include "../headers/DNA.h"
 #include "../headers/Organism.h"
+#include "../headers/helper.h"
 
 World::World(int width, int height, uint32_t seed) {
     width_ = width;
@@ -103,6 +104,7 @@ void World::init_environment() {
 }
 
 void World::run_evolution() {
+	lolilol();
     //Tans que le temps n'a pas dépacer le nombre de mutation max
     while (time_ < Common::Number_Evolution_Step) {
         evolution_step();

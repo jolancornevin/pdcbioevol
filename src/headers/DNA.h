@@ -5,7 +5,6 @@
 #ifndef PDC_EVOL_MODEL_DNA_H
 #define PDC_EVOL_MODEL_DNA_H
 
-
 #include "GridCell.h"
 #include "BP.h"
 
