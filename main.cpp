@@ -44,7 +44,7 @@ int main() {
 	set_rank(rank);
 	lolilol();
 	
-	if (rank == 0) {
+	if (is_master()) {
 		int target_thread_num = 4;
 		omp_set_num_threads(target_thread_num);
 
