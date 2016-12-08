@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <mpi.h>
 #include <time.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -20,40 +21,26 @@ int main() {
 	MPI_Init(NULL, NULL);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
+	
 	if (!rank) {
 		bcast_value = 42;
 	}
+	
 	MPI_Bcast(&bcast_value,1 ,MPI_INT, 0, MPI_COMM_WORLD );
 	printf("%s\t- %d - %d - %d\n", hostname, rank, size, bcast_value);
 	fflush(stdout);
-
-	MPI_Barrier(MPI_COMM_WORLD);
-	MPI_Finalize();
-	return 0;
-       
-       
-	// Initialize the MPI environment
-    MPI_Init(NULL, NULL);
-
-    // Get the number of processes
-    int world_size;
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-
-    // Get the rank of the process
-    int world_rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-
-    // Get the name of the processor
-    char processor_name[MPI_MAX_PROCESSOR_NAME];
-    int name_len;
-    MPI_Get_processor_name(processor_name, &name_len);
-
-    // Print off a hello world message
-    printf(">>>>>>>>>>>>>>>>>>>>>> Hello world from processor %s, rank %d"
-           " out of %d processors <<<<<<<<<<<<<<<<<<<<<<<<<<\n",
-           processor_name, world_rank, world_size);
-           
-    if (world_rank == 1) {
+	
+	//Test if openMP is working
+	#pragma omp parallel
+	{
+		int thread_id = omp_get_thread_num();
+		#pragma omp critical
+		{
+			std::cout << "RANK" << rank << Thread number: " << omp_get_thread_num() << endl;
+		}
+	}
+	
+	if (rank == 1) {
 		int target_thread_num = 4;
 		omp_set_num_threads(target_thread_num);
 
@@ -63,16 +50,6 @@ int main() {
 		double wall0 = get_wall_time();
 		double cpu0  = get_cpu_time();
 
-		//Test if openMP is working
-		//TODO à supprimer quand c'est vérifier
-		#pragma omp parallel
-		{
-			int thread_id = omp_get_thread_num();
-			#pragma omp critical
-			{
-				std::cout << "Thread number: " << omp_get_thread_num() << endl;
-			}
-		}
 
 		printf("Init binding matrix\n");
 		Common::init_binding_matrix(897685687);
@@ -101,7 +78,8 @@ int main() {
 		cout << "Wall Time = " << wall1 - wall0 << endl;
 		cout << "Total CPU Time  = " << cpu1  - cpu0  << endl;
 	}
-    
-    // Finalize the MPI environment.
-    MPI_Finalize(); 
+
+	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Finalize();
+	return 0;
 }
