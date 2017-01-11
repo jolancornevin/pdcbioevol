@@ -1,1 +1,1 @@
-cmake -D CMAKE_CXX_COMPILER=mpic++ CMakeLists.txt
+cmake -D CMAKE_CXX_COMPILER=/usr/bin/mpic++ CMakeLists.txt
