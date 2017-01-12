@@ -265,6 +265,20 @@ void Organism::init_organism() {
     translate_move();
 }
 
+/* test *
+// Il faut correctement organiser les tableaux
+float[] compute_protein_concentration(float[] proteins_concentrations,
+                                      float[] rna_concentrations,
+                                      int size) {
+  for (int i = 0; i < size)
+
+    //prot.second c’est quoi exactement ?
+
+
+    //retourner les concentrations
+}
+/**/
+
 void Organism::compute_protein_concentration() {
     //TODO à optimiser, mais je sais pas trop comment
 #pragma omp parallel
