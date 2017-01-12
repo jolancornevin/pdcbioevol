@@ -40,17 +40,6 @@ int main() {
     double wall0 = get_wall_time();
     double cpu0  = get_cpu_time();
 
-    //Test if openMP is working
-    //TODO à supprimer quand c'est vérifier
-    #pragma omp parallel
-    {
-        int thread_id = omp_get_thread_num();
-        #pragma omp critical
-        {
-            std::cout << "Thread number: " << omp_get_thread_num() << endl;
-        }
-    }
-
     printf("Init binding matrix\n");
     Common::init_binding_matrix(897685687);
 
