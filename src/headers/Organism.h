@@ -82,6 +82,10 @@ public:
     void compute_protein_concentration();
 
     Organism *divide();
+
+    float * _mpi_compute_protein_concentration(float *_rna_influence_first, float *_rna_influence_second,
+                                               float *_protein_concentration_index, float *_protein_concentration_value,
+                                               float *_rna_current_concentration, float *_rna_base_concentration);
 };
 
 #endif //PDC_EVOL_MODEL_ORGANISM_H

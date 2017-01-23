@@ -271,13 +271,79 @@ float[] compute_protein_concentration(float[] proteins_concentrations,
                                       float[] rna_concentrations,
                                       int size) {
   for (int i = 0; i < size)
-
     //prot.second c’est quoi exactement ?
-
-
     //retourner les concentrations
 }
 /**/
+
+int _getIndexValueFromFloat(float _protein_concentration_index[], float searchedFloat) {
+    int iProt = 0, lenProt = (sizeof(_protein_concentration_index) / sizeof(*_protein_concentration_index));
+    for (; iProt < lenProt; ++iProt) {
+        if (_protein_concentration_index[iProt] == searchedFloat)
+            return iProt;
+    }
+    return -1;
+}
+
+float * Organism::_mpi_compute_protein_concentration(float _rna_influence_first[], float _rna_influence_second[],
+                                                     float _protein_concentration_index[],
+                                                     float _protein_concentration_value[],
+                                                     float _rna_current_concentration[], float _rna_base_concentration[]) {
+    int currentRanLength = (sizeof(_rna_current_concentration) / sizeof(*_rna_current_concentration));
+#pragma omp parallel
+    {
+#pragma omp for
+        for (int rna_id = 0; rna_id < currentRanLength; rna_id++) {
+            float delta_pos = 0, delta_neg = 0;
+
+            int iRna = 0, lenRna = (sizeof(_rna_influence_first) / sizeof(*_rna_influence_first));
+
+            for (iRna = 0; iRna < lenRna; ++iRna) {
+                int _index = _getIndexValueFromFloat(_protein_concentration_index, _rna_influence_first[iRna]);
+                if (_index != -1) {
+                    if (_rna_influence_second[iRna] > 0) {
+                        delta_pos += _rna_influence_second[iRna] * _protein_concentration_value[_index];
+                    } else {
+                        delta_neg += _rna_influence_second[iRna] * _protein_concentration_value[_index];
+                    }
+                }
+            }
+
+            float delta_pos_pow_n = pow(delta_pos, Common::hill_shape_n);
+            float delta_neg_pow_n = pow(delta_neg, Common::hill_shape_n);
+
+            _rna_current_concentration[rna_id] = _rna_base_concentration[rna_id]
+                                                 * (Common::hill_shape / (delta_neg_pow_n + Common::hill_shape))
+                                                 * (1 + ((1 / _rna_base_concentration[rna_id]) - 1)
+                                                        * (delta_pos_pow_n /
+                                                           (delta_pos_pow_n + Common::hill_shape)));
+        }
+    }
+
+    std::unordered_map<float, float> delta_concentration;
+
+    for (auto rna : rna_produce_protein_) {
+        for (auto prot : rna_produce_protein_[rna.first]) {
+            if (delta_concentration.find(prot.first) == delta_concentration.end()) {
+                delta_concentration[prot.first] = _rna_current_concentration[rna.first];
+            } else {
+                delta_concentration[prot.first] += _rna_current_concentration[rna.first];
+            }
+        }
+    }
+
+    for (auto delta : delta_concentration) {
+        int _index = _getIndexValueFromFloat(_protein_concentration_index, delta.first);
+        if (_index != -1) {
+            delta.second -= Common::Protein_Degradation_Rate * _protein_concentration_value[_index];
+            delta.second *= 1 / (Common::Protein_Degradation_Step);
+
+            _protein_concentration_value[_index] += delta.second;
+        }
+    }
+
+    return _protein_concentration_value;
+}
 
 void Organism::compute_protein_concentration() {
     //TODO à optimiser, mais je sais pas trop comment
@@ -298,12 +364,10 @@ void Organism::compute_protein_concentration() {
             float delta_neg_pow_n = pow(delta_neg, Common::hill_shape_n);
 
             rna_list_[rna_id]->current_concentration_ = rna_list_[rna_id]->concentration_base_
-                                                        * (Common::hill_shape
-                                                           / (delta_neg_pow_n + Common::hill_shape))
+                                                        * (Common::hill_shape / (delta_neg_pow_n + Common::hill_shape))
                                                         * (1 + ((1 / rna_list_[rna_id]->concentration_base_) - 1)
                                                                * (delta_pos_pow_n /
-                                                                  (delta_pos_pow_n +
-                                                                   Common::hill_shape)));
+                                                                  (delta_pos_pow_n + Common::hill_shape)));
         }
     }
 
