@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdio.h>
 
 using namespace std;
 
@@ -12,7 +13,7 @@ bool is_master() {
 	return _rank == 0;
 }
 
-void lolilol()
+void print_rank()
 {
-	printf("\n ------- coucou, %d \n", _rank);
+	printf("\n ------- Your MPI rank is : , %d \n", _rank);
 }

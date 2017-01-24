@@ -5,7 +5,8 @@
 #include "../headers/Organism.h"
 #include "../headers/DNA.h"
 #include "../headers/Common.h"
-
+#include <iostream>
+#include <vector>
 
 void Organism::translate_RNA() {
 
@@ -265,86 +266,6 @@ void Organism::init_organism() {
     translate_move();
 }
 
-/* test *
-// Il faut correctement organiser les tableaux
-float[] compute_protein_concentration(float[] proteins_concentrations,
-                                      float[] rna_concentrations,
-                                      int size) {
-  for (int i = 0; i < size)
-    //prot.second c’est quoi exactement ?
-    //retourner les concentrations
-}
-/**/
-
-int _getIndexValueFromFloat(float _protein_concentration_index[], float searchedFloat) {
-    int iProt = 0, lenProt = (sizeof(_protein_concentration_index) / sizeof(*_protein_concentration_index));
-    for (; iProt < lenProt; ++iProt) {
-        if (_protein_concentration_index[iProt] == searchedFloat)
-            return iProt;
-    }
-    return -1;
-}
-
-float * Organism::_mpi_compute_protein_concentration(float _rna_influence_first[], float _rna_influence_second[],
-                                                     float _protein_concentration_index[],
-                                                     float _protein_concentration_value[],
-                                                     float _rna_current_concentration[], float _rna_base_concentration[]) {
-    int currentRanLength = (sizeof(_rna_current_concentration) / sizeof(*_rna_current_concentration));
-#pragma omp parallel
-    {
-#pragma omp for
-        for (int rna_id = 0; rna_id < currentRanLength; rna_id++) {
-            float delta_pos = 0, delta_neg = 0;
-
-            int iRna = 0, lenRna = (sizeof(_rna_influence_first) / sizeof(*_rna_influence_first));
-
-            for (iRna = 0; iRna < lenRna; ++iRna) {
-                int _index = _getIndexValueFromFloat(_protein_concentration_index, _rna_influence_first[iRna]);
-                if (_index != -1) {
-                    if (_rna_influence_second[iRna] > 0) {
-                        delta_pos += _rna_influence_second[iRna] * _protein_concentration_value[_index];
-                    } else {
-                        delta_neg += _rna_influence_second[iRna] * _protein_concentration_value[_index];
-                    }
-                }
-            }
-
-            float delta_pos_pow_n = pow(delta_pos, Common::hill_shape_n);
-            float delta_neg_pow_n = pow(delta_neg, Common::hill_shape_n);
-
-            _rna_current_concentration[rna_id] = _rna_base_concentration[rna_id]
-                                                 * (Common::hill_shape / (delta_neg_pow_n + Common::hill_shape))
-                                                 * (1 + ((1 / _rna_base_concentration[rna_id]) - 1)
-                                                        * (delta_pos_pow_n /
-                                                           (delta_pos_pow_n + Common::hill_shape)));
-        }
-    }
-
-    std::unordered_map<float, float> delta_concentration;
-
-    for (auto rna : rna_produce_protein_) {
-        for (auto prot : rna_produce_protein_[rna.first]) {
-            if (delta_concentration.find(prot.first) == delta_concentration.end()) {
-                delta_concentration[prot.first] = _rna_current_concentration[rna.first];
-            } else {
-                delta_concentration[prot.first] += _rna_current_concentration[rna.first];
-            }
-        }
-    }
-
-    for (auto delta : delta_concentration) {
-        int _index = _getIndexValueFromFloat(_protein_concentration_index, delta.first);
-        if (_index != -1) {
-            delta.second -= Common::Protein_Degradation_Rate * _protein_concentration_value[_index];
-            delta.second *= 1 / (Common::Protein_Degradation_Step);
-
-            _protein_concentration_value[_index] += delta.second;
-        }
-    }
-
-    return _protein_concentration_value;
-}
-
 void Organism::compute_protein_concentration() {
     //TODO à optimiser, mais je sais pas trop comment
 #pragma omp parallel
@@ -585,7 +506,6 @@ Organism *Organism::divide() {
     return new_org;
 }
 
-
 Organism::Organism(Organism *organism) {
     dna_ = new DNA(organism->dna_);
 
@@ -627,4 +547,209 @@ Organism::~Organism() {
         delete move;
     }
     move_list_.clear();
+}
+
+/*
+========================================================================================================================
+                                                    MPI
+========================================================================================================================
+ */
+
+//TODO send array avec MPI.
+
+/**
+ * @desc Run
+ */
+void Organism::mpiComputeProteinConcentrationFromMaster() {
+    float **rna = _getRnaInfluenceFristAndSeconds();
+    float **protein = _getProteinConcentrationIndexAndValues();
+    float *contentration_base = _getRnaConcentrationBase();
+
+    //TODO send everything to other machines
+
+    float *res = _mpi_compute_protein_concentration(*rna[0], rna[1], rna[2],
+                                                    (float) protein_list_map_.size(), protein[0], protein[1],
+                                                    (float) rna_list_.size(), contentration_base);
+
+    for (int i = 0; i < protein_list_map_.size(); ++i)
+        protein_list_map_[protein[0][i]]->concentration_ = res[i];
+
+    delete[] rna[0];
+    delete[] rna[1];
+    delete[] rna[2];
+
+    delete[] protein[0];
+    delete[] protein[1];
+
+    delete[] contentration_base;
+}
+
+
+/**
+ * @desc
+ * @param _protein_concentration_index
+ * @param searchedFloat
+ * @return
+ */
+int Organism::_getIndexValueFromFloat(float _protein_concentration_index[], float searchedFloat) {
+    int iProt = 0, lenProt = (sizeof(_protein_concentration_index) / sizeof(*_protein_concentration_index));
+    for (; iProt < lenProt; ++iProt) {
+        if (_protein_concentration_index[iProt] == searchedFloat)
+            return iProt;
+    }
+    return -1;
+}
+
+/**
+ * Contruit deux tableaux à partir de la map protein_list_map_
+ * @return
+ */
+float **Organism::_getProteinConcentrationIndexAndValues() {
+    float **res = (float **) malloc(3 * sizeof(float *));
+
+    float *index = (float *) malloc(protein_list_map_.size() * sizeof(float));
+    float *value = (float *) malloc(protein_list_map_.size() * sizeof(float));
+
+    int i = 0;
+
+    for (auto prot : protein_list_map_) {
+        index[i] = prot.first;
+        value[i++] = prot.second->concentration_;
+    }
+
+    res[1] = index;
+    res[2] = value;
+
+    return res;
+}
+
+/**
+ * Contruit deux tableaux à partir de la map rna_influence
+ * @return
+ */
+float **Organism::_getRnaInfluenceFristAndSeconds() {
+    float **res = (float **) malloc(3 * sizeof(float *));
+    std::vector<float> *first = new std::vector<float>();
+    std::vector<float> *seconds = new std::vector<float>();
+
+    float *size = new float(0);
+
+    for (auto rna : rna_influence_) {
+        for (auto prot : rna.second) {
+            *size += 1;
+            first->push_back(prot.first);
+            seconds->push_back(prot.second);
+        }
+    }
+
+    //making a pointer that points to the actual array the vector is using internally.
+    res[0] = size;
+    res[1] = &((*first)[0]);
+    res[2] = &((*seconds)[0]);
+
+    return res;
+}
+
+/**
+ * Contruit deux tableaux à partir de la map rna_influence
+ * @return
+ */
+float *Organism::_getRnaConcentrationBase() {
+    float *concentrationBase = (float *) malloc(rna_list_.size() * sizeof(float));
+
+    for (int rna_id = 0; rna_id < rna_list_.size(); rna_id++) {
+        concentrationBase[rna_id] = rna_list_[rna_id]->concentration_base_;
+    }
+
+    return concentrationBase;
+}
+
+/**
+ * @desc : Permet d'executer la fonction compute_protein_concentration en mpi. Il faut donc transformer tout les objets en array
+ *
+ *          rna_influence_ : map<int, map<float, float>> --> float first[], float seconds[]
+ *                          Comme la map est en fait utilisé comme un tableau, et que l'on fait des lectures itératives
+ *                              i.e on ne récupère de valeur de la deuxième map avec un float,
+ *                          on peut transformer cette map de map en tableau, contenant toutes les valeurs à la suite
+ *
+ *          protein_list_map_: On utilise seulement la valeur contentration de celles ci. Par contre, on y accède par un float
+ *                             On construit donc deux tableau. Un qui contient les index et un autre les valeurs associé
+ *                             On fait la correspondances entre leux deux par rapport à leurs indices dans le tableau
+ *                                  --> _getIndexValueFromFloat
+ *
+ *          rna_list_[rna_id]->current_concentration_ : n'est pas passé en paramètre car utilisé seulement dans cette fonction
+ *
+ *          rna_list_[rna_id]->concentration_base_ :
+ *
+ * @param _rna_influence_first
+ * @param _rna_influence_second
+ * @param _protein_concentration_index
+ * @param _protein_concentration_value
+ * @param _rna_current_concentration
+ * @param _rna_base_concentration
+ * @return
+ */
+float *Organism::_mpi_compute_protein_concentration(float _rna_size, float _rna_influence_first[],
+                                                    float _rna_influence_second[],
+                                                    float _protein_size,
+                                                    float _protein_concentration_index[],
+                                                    float _protein_concentration_value[],
+                                                    float _rna_base_size,
+                                                    float _rna_base_concentration[]) {
+
+    float _rna_current_concentration[(int) _rna_base_size];
+
+#pragma omp parallel
+    {
+#pragma omp for
+        for (int rna_id = 0; rna_id < _rna_base_size; rna_id++) {
+            float delta_pos = 0, delta_neg = 0;
+
+            int iRna = 0;
+
+            for (iRna = 0; iRna < _rna_size; ++iRna) {
+                int _index = _getIndexValueFromFloat(_protein_concentration_index, _rna_influence_first[iRna]);
+                if (_index != -1) {
+                    if (_rna_influence_second[iRna] > 0) {
+                        delta_pos += _rna_influence_second[iRna] * _protein_concentration_value[_index];
+                    } else {
+                        delta_neg += _rna_influence_second[iRna] * _protein_concentration_value[_index];
+                    }
+                }
+            }
+
+            float delta_pos_pow_n = pow(delta_pos, Common::hill_shape_n);
+            float delta_neg_pow_n = pow(delta_neg, Common::hill_shape_n);
+
+            _rna_current_concentration[rna_id] = _rna_base_concentration[rna_id]
+                                                 * (Common::hill_shape / (delta_neg_pow_n + Common::hill_shape))
+                                                 * (1 + ((1 / _rna_base_concentration[rna_id]) - 1)
+                                                        * (delta_pos_pow_n /
+                                                           (delta_pos_pow_n + Common::hill_shape)));
+        }
+    }
+
+    std::unordered_map<float, float> delta_concentration;
+
+    for (auto rna : rna_produce_protein_) {
+        for (auto prot : rna_produce_protein_[rna.first]) {
+            if (delta_concentration.find(prot.first) == delta_concentration.end()) {
+                delta_concentration[prot.first] = _rna_current_concentration[rna.first];
+            } else {
+                delta_concentration[prot.first] += _rna_current_concentration[rna.first];
+            }
+        }
+    }
+
+    for (auto delta : delta_concentration) {
+        int _index = _getIndexValueFromFloat(_protein_concentration_index, delta.first);
+        if (_index != -1) {
+            delta.second -= Common::Protein_Degradation_Rate * _protein_concentration_value[_index];
+            delta.second *= 1 / (Common::Protein_Degradation_Step);
+
+            _protein_concentration_value[_index] += delta.second;
+        }
+    }
+
+    return _protein_concentration_value;
 }

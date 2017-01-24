@@ -161,8 +161,9 @@ void World::evolution_step() {
                     grid_cell_[line * width_ + column]->organism_->activate_pump();
                     grid_cell_[line * width_ + column]->organism_->build_regulation_network();
 
-                    for (int t = 0; t < Common::Number_Degradation_Step; t++)
-                        grid_cell_[line * width_ + column]->organism_->compute_protein_concentration();
+                    for (int t = 0; t < Common::Number_Degradation_Step; t++) {
+                        grid_cell_[line * width_ + column]->organism_->mpiComputeProteinConcentrationFromMaster();
+                    }
 
                     //Si l'organisme est mort, on libère la mémoire et les pointeurs
                     if (grid_cell_[line * width_ + column]->organism_->dying_or_not()) {

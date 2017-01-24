@@ -5,6 +5,8 @@
 
 void set_rank(int rank);
 bool is_master();
-void lolilol();
+
+void print_rank();
+
 
 #endif //PDC_EVOL_HELPER_H

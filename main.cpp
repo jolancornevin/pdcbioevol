@@ -5,10 +5,9 @@
 #include "src/headers/cpu_time.h"
 #include <omp.h>
 #include <ctime>
-#include <stdio.h>
 #include <mpi.h>
-#include <time.h>
 #include <unistd.h>
+#include <stdio.h>
 
 using namespace std;
 
@@ -42,7 +41,7 @@ int main() {
     }
 
     set_rank(rank);
-    lolilol();
+    print_rank();
 
     if (is_master()) {
         int target_thread_num = 4;
@@ -54,7 +53,6 @@ int main() {
         double wall0 = get_wall_time();
         double cpu0 = get_cpu_time();
 
-
         printf("Init binding matrix\n");
         Common::init_binding_matrix(897685687);
 
@@ -64,8 +62,7 @@ int main() {
         printf("Initialize environment\n");
         world->init_environment();
 
-        bool test = false;
-        if (test) {
+        if (false) {
             world->test_mutate();
         } else {
             printf("Initialize random population\n");

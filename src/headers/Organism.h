@@ -83,9 +83,22 @@ public:
 
     Organism *divide();
 
-    float * _mpi_compute_protein_concentration(float *_rna_influence_first, float *_rna_influence_second,
-                                               float *_protein_concentration_index, float *_protein_concentration_value,
-                                               float *_rna_current_concentration, float *_rna_base_concentration);
+    void mpiComputeProteinConcentrationFromMaster();
+
+private:
+
+    float ** _getRnaInfluenceFristAndSeconds();
+
+    float **_getProteinConcentrationIndexAndValues();
+
+    float * _getRnaConcentrationBase();
+
+    int _getIndexValueFromFloat(float *_protein_concentration_index, float searchedFloat);
+
+    float *_mpi_compute_protein_concentration(float _rna_size, float *_rna_influence_first, float *_rna_influence_second,
+                                              float _protein_size, float *_protein_concentration_index,
+                                              float *_protein_concentration_value, float _rna_base_size,
+                                              float *_rna_base_concentration);
 };
 
 #endif //PDC_EVOL_MODEL_ORGANISM_H
