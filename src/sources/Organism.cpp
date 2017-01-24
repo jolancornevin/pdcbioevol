@@ -561,26 +561,38 @@ Organism::~Organism() {
  * @desc Run
  */
 void Organism::mpiComputeProteinConcentrationFromMaster() {
+//    printf("0\n");
+
     float **rna = _getRnaInfluenceFristAndSeconds();
     float **protein = _getProteinConcentrationIndexAndValues();
     float *contentration_base = _getRnaConcentrationBase();
 
     //TODO send everything to other machines
 
+//    printf("1\n");
+
     float *res = _mpi_compute_protein_concentration(*rna[0], rna[1], rna[2],
                                                     (float) protein_list_map_.size(), protein[0], protein[1],
                                                     (float) rna_list_.size(), contentration_base);
 
-    for (int i = 0; i < protein_list_map_.size(); ++i)
-        protein_list_map_[protein[0][i]]->concentration_ = res[i];
+//    printf("2\n");
 
+    for (int i = 0; i < protein_list_map_.size(); ++i) {
+//        printf("%f\n", res[i]);
+          protein_list_map_[protein[0][i]]->concentration_ = res[i];
+    }
+
+//    printf("3\n");
     delete[] rna[0];
+//    printf("4\n");
     delete[] rna[1];
+//    printf("5\n");
     delete[] rna[2];
-
+//    printf("6\n");
     delete[] protein[0];
+//    printf("7\n");
     delete[] protein[1];
-
+//    printf("8\n");
     delete[] contentration_base;
 }
 
@@ -605,7 +617,7 @@ int Organism::_getIndexValueFromFloat(float _protein_concentration_index[], floa
  * @return
  */
 float **Organism::_getProteinConcentrationIndexAndValues() {
-    float **res = (float **) malloc(3 * sizeof(float *));
+    float **res = (float **) malloc(2 * sizeof(float *));
 
     float *index = (float *) malloc(protein_list_map_.size() * sizeof(float));
     float *value = (float *) malloc(protein_list_map_.size() * sizeof(float));
@@ -617,8 +629,8 @@ float **Organism::_getProteinConcentrationIndexAndValues() {
         value[i++] = prot.second->concentration_;
     }
 
-    res[1] = index;
-    res[2] = value;
+    res[0] = index;
+    res[1] = value;
 
     return res;
 }
@@ -702,7 +714,7 @@ float *Organism::_mpi_compute_protein_concentration(float _rna_size, float _rna_
 #pragma omp parallel
     {
 #pragma omp for
-        for (int rna_id = 0; rna_id < _rna_base_size; rna_id++) {
+        for (int rna_id = 0; rna_id < (int)_rna_base_size; rna_id++) {
             float delta_pos = 0, delta_neg = 0;
 
             int iRna = 0;
