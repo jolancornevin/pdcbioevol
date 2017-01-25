@@ -171,8 +171,8 @@ void World::evolution_step() {
                         grid_cell_[line * width_ + column]->organism_ = nullptr;
                         death_++;
                     } else {
-	                grid_cell_[line * width_ + column]->organism_->compute_fitness();
-		    }
+                        grid_cell_[line * width_ + column]->organism_->compute_fitness();
+                    }
                 }
             }
         }
@@ -181,14 +181,18 @@ void World::evolution_step() {
     //Parcours toutes les cellules, calcul leurs fitness et recherche la fitness max et min
     //TODO la recheche de max et min empêche l'optimisation ?
     //TODO du coup on peut peux être optimier en sortant le recherche du min max, et parraléliser le compute_fiteness
-    for (line = 0; line < width_; line++) {
-        for (column = 0; column < height_; column++) {
-            if (grid_cell_[line * width_ + column]->organism_ != nullptr) {
-                max_fitness_ = (grid_cell_[line * width_ + column]->organism_->fitness_ > max_fitness_)
-                               ? grid_cell_[line * width_ + column]->organism_->fitness_ : max_fitness_;
+#pragma omp parallel
+    {
+#pragma omp for reduction(max:max_fitness_), reduction(min:min_fitness_)
+        for (line = 0; line < width_; line++) {
+            for (column = 0; column < height_; column++) {
+                if (grid_cell_[line * width_ + column]->organism_ != nullptr) {
+                    max_fitness_ = (grid_cell_[line * width_ + column]->organism_->fitness_ > max_fitness_)
+                                   ? grid_cell_[line * width_ + column]->organism_->fitness_ : max_fitness_;
 
-                min_fitness_ = (grid_cell_[line * width_ + column]->organism_->fitness_ < min_fitness_)
-                               ? grid_cell_[line * width_ + column]->organism_->fitness_ : min_fitness_;
+                    min_fitness_ = (grid_cell_[line * width_ + column]->organism_->fitness_ < min_fitness_)
+                                   ? grid_cell_[line * width_ + column]->organism_->fitness_ : min_fitness_;
+                }
             }
         }
     }
@@ -227,7 +231,8 @@ void World::evolution_step() {
 #pragma omp critical
                         {
                             grid_cell_[line * width_ + column]->organism_ = new Organism(new DNA(org_n->dna_));
-                            grid_cell_[line * width_ + column]->organism_->gridcell_ = grid_cell_[line * width_ + column];
+                            grid_cell_[line * width_ + column]->organism_->gridcell_ = grid_cell_[line * width_ +
+                                                                                                  column];
                         }
 
                         grid_cell_[line * width_ + column]->organism_->mutate();
@@ -242,9 +247,9 @@ void World::evolution_step() {
     //Parcours toutes les cellules et diffuse et degrade les protéines
     //TODO à optimiser
     for (line = 0; line < width_; line++) {
-        #pragma omp parallel
+#pragma omp parallel
         {
-            #pragma omp for
+#pragma omp for
             for (column = 0; column < height_; column++) {
                 grid_cell_[line * width_ + column]->diffuse_protein();
                 grid_cell_[line * width_ + column]->degrade_protein();
