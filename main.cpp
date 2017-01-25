@@ -41,6 +41,7 @@ int main() {
     }
 
     set_rank(rank);
+    set_world_size(size);
     print_rank();
 
     if (is_master()) {
@@ -84,3 +85,4 @@ int main() {
     MPI_Finalize();
     return 0;
 }
+
