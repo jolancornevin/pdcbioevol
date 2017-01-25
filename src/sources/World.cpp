@@ -170,7 +170,9 @@ void World::evolution_step() {
                         delete grid_cell_[line * width_ + column]->organism_;
                         grid_cell_[line * width_ + column]->organism_ = nullptr;
                         death_++;
-                    }
+                    } else {
+	                grid_cell_[line * width_ + column]->organism_->compute_fitness();
+		    }
                 }
             }
         }
@@ -182,10 +184,6 @@ void World::evolution_step() {
     for (line = 0; line < width_; line++) {
         for (column = 0; column < height_; column++) {
             if (grid_cell_[line * width_ + column]->organism_ != nullptr) {
-
-                grid_cell_[line * width_ + column]->organism_->compute_fitness();
-
-
                 max_fitness_ = (grid_cell_[line * width_ + column]->organism_->fitness_ > max_fitness_)
                                ? grid_cell_[line * width_ + column]->organism_->fitness_ : max_fitness_;
 
