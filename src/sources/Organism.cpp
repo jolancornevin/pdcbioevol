@@ -567,7 +567,7 @@ void Organism::mpiComputeProteinConcentrationFromMaster() {
     float **protein = _getProteinConcentrationIndexAndValues();
     float *contentration_base = _getRnaConcentrationBase();
 
-    printf("sizes : rna %d, protein %d, concentration %d", (int) *rna[0], protein_list_map_.size(), rna_list_.size());
+//    printf("sizes : rna %d, protein %d, concentration %d", (int) *rna[0], protein_list_map_.size(), rna_list_.size());
 
     //TODO send everything to other machines
     float *res = _mpi_compute_protein_concentration(*rna[0], rna[1], rna[2],
