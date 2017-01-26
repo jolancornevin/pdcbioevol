@@ -568,6 +568,10 @@ void Organism::mpiComputeProteinConcentrationFromMaster() {
     //printf("sizes : rna %d, protein %d, concentration %d", (int) *rna[0], protein_list_map_.size(), rna_list_.size());
 
     //TODO send everything to other machines
+
+    for (int iMpiNode = 1; iMpiNode < get_world_size(); ++iMpiNode)
+        MPI_Send(rna[0], 1, MPI_FLOAT, iMpiNode, 0, MPI_COMM_WORLD);
+
     float *res = _mpi_compute_protein_concentration(*rna[0], rna[1], rna[2],
                                                     (float) protein_list_map_.size(), protein[0], protein[1],
                                                     (float) rna_list_.size(), contentration_base);

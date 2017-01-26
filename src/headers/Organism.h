@@ -5,7 +5,6 @@
 #ifndef PDC_EVOL_MODEL_ORGANISM_H
 #define PDC_EVOL_MODEL_ORGANISM_H
 
-
 #include <vector>
 #include <unordered_map>
 #include "Move.h"
@@ -14,6 +13,7 @@
 #include "RNA.h"
 #include "Common.h"
 #include "GridCell.h"
+#include <mpi.h>
 
 class DNA;
 

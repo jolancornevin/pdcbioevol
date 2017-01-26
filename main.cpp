@@ -82,6 +82,11 @@ int main() {
         cout << "Wall Time = " << wall1 - wall0 << endl;
         cout << "Total CPU Time  = " << cpu1 - cpu0 << endl;
     }
+    else {
+        float size_rna;
+        MPI_Recv(&size_rna, 1, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        printf("Process 1 received number %f from process 0\n", size_rna);
+    }
 
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Finalize();
