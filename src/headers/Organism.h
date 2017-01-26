@@ -13,6 +13,7 @@
 #include "RNA.h"
 #include "Common.h"
 #include "GridCell.h"
+#include "helper.h"
 #include <mpi.h>
 
 class DNA;

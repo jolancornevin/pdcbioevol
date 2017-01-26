@@ -135,6 +135,10 @@ void World::run_evolution() {
         }
         time_++;
     }
+
+    float fin = -1f;
+    for (int iMpiNode = 1; iMpiNode < get_world_size(); ++iMpiNode)
+        MPI_Send(&fin, 1, MPI_FLOAT, iMpiNode, 0, MPI_COMM_WORLD);
 }
 
 /**

@@ -12,6 +12,8 @@
 #include <random>
 #include <iostream>
 #include <fstream>
+#include "helper.h"
+#include <mpi.h>
 
 class GridCell;
 
