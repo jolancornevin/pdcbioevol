@@ -561,37 +561,26 @@ Organism::~Organism() {
  * @desc Run
  */
 void Organism::mpiComputeProteinConcentrationFromMaster() {
-//    printf("0\n");
-
     float **rna = _getRnaInfluenceFristAndSeconds();
     float **protein = _getProteinConcentrationIndexAndValues();
     float *contentration_base = _getRnaConcentrationBase();
 
-//    printf("sizes : rna %d, protein %d, concentration %d", (int) *rna[0], protein_list_map_.size(), rna_list_.size());
+    //printf("sizes : rna %d, protein %d, concentration %d", (int) *rna[0], protein_list_map_.size(), rna_list_.size());
 
     //TODO send everything to other machines
     float *res = _mpi_compute_protein_concentration(*rna[0], rna[1], rna[2],
                                                     (float) protein_list_map_.size(), protein[0], protein[1],
                                                     (float) rna_list_.size(), contentration_base);
 
-//    printf("2\n");
-
     for (int i = 0; i < protein_list_map_.size(); ++i) {
-//        printf("%f\n", res[i]);
         protein_list_map_[protein[0][i]]->concentration_ = res[i];
     }
 
-//    printf("3\n");
     delete[] rna[0];
-//    printf("4\n");
     delete[] rna[1];
-//    printf("5\n");
     delete[] rna[2];
-//    printf("6\n");
     delete[] protein[0];
-//    printf("7\n");
     delete[] protein[1];
-//    printf("8\n");
     delete[] contentration_base;
 }
 
@@ -604,10 +593,12 @@ void Organism::mpiComputeProteinConcentrationFromMaster() {
  */
 int Organism::_getIndexValueFromFloat(float _protein_concentration_index[], float searchedFloat) {
     int iProt = 0, lenProt = (sizeof(_protein_concentration_index) / sizeof(*_protein_concentration_index));
+
     for (; iProt < lenProt; ++iProt) {
         if (_protein_concentration_index[iProt] == searchedFloat)
             return iProt;
     }
+
     return -1;
 }
 

@@ -11,6 +11,8 @@
 
 using namespace std;
 
+
+
 int main() {
     char hostname[257];
     int size, rank;

@@ -178,30 +178,28 @@ void World::evolution_step() {
         }
     }
 
-float _max = max_fitness_,
-      _min = min_fitness_;
+    float _max = max_fitness_,
+            _min = min_fitness_;
 
     //Parcours toutes les cellules, calcul leurs fitness et recherche la fitness max et min
-    //TODO la recheche de max et min empêche l'optimisation ?
-    //TODO du coup on peut peux être optimier en sortant le recherche du min max, et parraléliser le compute_fiteness
-        for (line = 0; line < width_; line++) {
+    for (line = 0; line < width_; line++) {
 #pragma omp parallel
-    {
+        {
 #pragma omp for reduction(max:_max), reduction(min:_min)
             for (column = 0; column < height_; column++) {
                 if (grid_cell_[line * width_ + column]->organism_ != nullptr) {
                     _max = (grid_cell_[line * width_ + column]->organism_->fitness_ > _max)
-                                   ? grid_cell_[line * width_ + column]->organism_->fitness_ : _max;
+                           ? grid_cell_[line * width_ + column]->organism_->fitness_ : _max;
 
                     _min = (grid_cell_[line * width_ + column]->organism_->fitness_ < _min)
-                                   ? grid_cell_[line * width_ + column]->organism_->fitness_ : _min;
+                           ? grid_cell_[line * width_ + column]->organism_->fitness_ : _min;
                 }
             }
         }
     }
 
-max_fitness_ = _max;
-min_fitness_ = _min;
+    max_fitness_ = _max;
+    min_fitness_ = _min;
 
     for (line = 0; line < width_; line++) {
 #pragma omp parallel
