@@ -153,26 +153,22 @@ void World::evolution_step() {
 
     //Parcours toutes les cellules
     for (line = 0; line < width_; line++) {
-#pragma omp parallel
-        {
-#pragma omp for
-            for (column = 0; column < height_; column++) {
-                if (grid_cell_[line * width_ + column]->organism_ != nullptr) {
-                    grid_cell_[line * width_ + column]->organism_->activate_pump();
-                    grid_cell_[line * width_ + column]->organism_->build_regulation_network();
+        for (column = 0; column < height_; column++) {
+            if (grid_cell_[line * width_ + column]->organism_ != nullptr) {
+                grid_cell_[line * width_ + column]->organism_->activate_pump();
+                grid_cell_[line * width_ + column]->organism_->build_regulation_network();
 
-                    for (int t = 0; t < Common::Number_Degradation_Step; t++) {
-                        grid_cell_[line * width_ + column]->organism_->compute_protein_concentration();
-                    }
+                for (int t = 0; t < Common::Number_Degradation_Step; t++) {
+                    grid_cell_[line * width_ + column]->organism_->compute_protein_concentration();
+                }
 
-                    //Si l'organisme est mort, on libère la mémoire et les pointeurs
-                    if (grid_cell_[line * width_ + column]->organism_->dying_or_not()) {
-                        delete grid_cell_[line * width_ + column]->organism_;
-                        grid_cell_[line * width_ + column]->organism_ = nullptr;
-                        death_++;
-                    } else {
-                        grid_cell_[line * width_ + column]->organism_->compute_fitness();
-                    }
+                //Si l'organisme est mort, on libère la mémoire et les pointeurs
+                if (grid_cell_[line * width_ + column]->organism_->dying_or_not()) {
+                    delete grid_cell_[line * width_ + column]->organism_;
+                    grid_cell_[line * width_ + column]->organism_ = nullptr;
+                    death_++;
+                } else {
+                    grid_cell_[line * width_ + column]->organism_->compute_fitness();
                 }
             }
         }
