@@ -135,10 +135,6 @@ void World::run_evolution() {
         }
         time_++;
     }
-
-    float fin = -1f;
-    for (int iMpiNode = 1; iMpiNode < get_world_size(); ++iMpiNode)
-        MPI_Send(&fin, 1, MPI_FLOAT, iMpiNode, 0, MPI_COMM_WORLD);
 }
 
 /**
@@ -166,7 +162,7 @@ void World::evolution_step() {
                     grid_cell_[line * width_ + column]->organism_->build_regulation_network();
 
                     for (int t = 0; t < Common::Number_Degradation_Step; t++) {
-                        grid_cell_[line * width_ + column]->organism_->mpiComputeProteinConcentrationFromMaster();
+                        grid_cell_[line * width_ + column]->organism_->compute_protein_concentration();
                     }
 
                     //Si l'organisme est mort, on libère la mémoire et les pointeurs
